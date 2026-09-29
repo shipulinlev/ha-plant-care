@@ -26,7 +26,7 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Tests: `tests/test_init.py` (manifest discovery, setup); `pythonpath = ["."]` in pytest config; `tests/core/conftest.py` overrides the HA autouse fixture so core tests run on Windows.
 - [x] Pin the minimum HA version: `2026.8.0` in `hacs.json` (`manifest.json` has no min-version field for custom integrations)
   - Correction: the single-config-entry-per-device change landed in HA **2026.8**, not 2026.07 (developers blog 2026-07-21).
-- [ ] CI (GitHub Actions): pytest, ruff, mypy, hassfest, HACS validation
+- [~] CI (GitHub Actions): pytest, ruff, mypy, hassfest, HACS validation
 
 ## Phase 1. Core: models and engine (no HA, TDD)
 - [ ] `core/models.py`: `PlantConfig`, `SpeciesProfile`, `CareEvent`, `ClimateReading`, `CarePlan`, status enums
@@ -72,6 +72,7 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
 - [ ] Automation examples ("time to water" notification) in README
 - [ ] Calibrate factors against real data
 - [ ] Choose a license
+- [ ] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
 - [ ] First release v0.1.0 (HACS custom repository)
 
 ## Backlog / ideas (after v0.1)
