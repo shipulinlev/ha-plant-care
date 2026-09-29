@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Create the dev venv and install tooling. Idempotent.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+venv="${VIRTUAL_ENV:-.venv}"
+[ -x "$venv/bin/python" ] || python3 -m venv "$venv"
+"$venv/bin/python" -m pip install --quiet --upgrade pip
+"$venv/bin/python" -m pip install --quiet --group dev

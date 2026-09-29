@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Run a local Home Assistant with this integration loaded from the working tree.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+mkdir -p config
+[ -f config/configuration.yaml ] || cp .devcontainer/configuration.yaml config/
+
+# Load custom_components/ straight from the repo instead of copying it.
+export PYTHONPATH="${PYTHONPATH:+$PYTHONPATH:}$PWD/custom_components"
+exec hass --config config --debug

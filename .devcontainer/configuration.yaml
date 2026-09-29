@@ -1,0 +1,18 @@
+# Dev instance config, copied to config/ by scripts/develop on first run.
+# default_config is avoided: its go2rtc dependency needs a binary we don't ship.
+homeassistant:
+  name: Plant Care Dev
+  unit_system: metric
+  time_zone: Europe/Moscow
+
+frontend:
+config:
+history:
+logbook:
+search:
+system_health:
+
+logger:
+  default: info
+  logs:
+    custom_components.plant_care: debug

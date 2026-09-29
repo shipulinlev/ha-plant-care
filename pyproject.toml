@@ -1,0 +1,70 @@
+# Tooling-only project: the integration itself ships as custom_components/plant_care
+# and is not installed as a Python package.
+[project]
+name = "ha-plant-care"
+version = "0.0.0"
+description = "Home Assistant custom integration for house and garden plant care"
+readme = "README.md"
+requires-python = ">=3.14.2"
+
+[dependency-groups]
+dev = [
+    # Pins the matching homeassistant version (currently 2026.9.4).
+    "pytest-homeassistant-custom-component==0.13.367",
+    "ruff>=0.14",
+    "mypy>=1.18",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+addopts = "-ra --strict-markers"
+
+[tool.ruff]
+target-version = "py314"
+line-length = 88
+extend-exclude = ["config"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W", "F",   # pycodestyle, pyflakes
+    "I",             # isort
+    "UP",            # pyupgrade
+    "B",             # bugbear
+    "ASYNC",         # blocking calls in async code
+    "SIM",
+    "RUF",
+    "PL",            # pylint
+    "PT",            # pytest style
+    "DTZ",           # naive datetimes
+    "LOG", "G",      # logging
+    "TID",           # banned imports (see below)
+]
+ignore = [
+    "PLR0913",       # HA APIs have many parameters
+    "PLR2004",       # magic values are fine in tests and constants
+]
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+known-first-party = ["custom_components.plant_care"]
+combine-as-imports = true
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"homeassistant".msg = "core/ must not depend on Home Assistant"
+
+[tool.ruff.lint.per-file-ignores]
+# The HA import ban applies only to the pure core package and its tests.
+"!{custom_components/plant_care/core,tests/core}/**" = ["TID251"]
+
+[tool.mypy]
+python_version = "3.14"
+strict = true
+warn_unreachable = true
+explicit_package_bases = true
+exclude = ["^config/"]
+
+[[tool.mypy.overrides]]
+module = "tests.*"
+disallow_untyped_decorators = false

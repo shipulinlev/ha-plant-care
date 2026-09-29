@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Run the full test suite plus linters inside the dev container.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+
+ruff check .
+ruff format --check .
+mypy .
+pytest "$@"
