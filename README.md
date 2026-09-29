@@ -28,7 +28,7 @@ A Home Assistant custom integration that helps you look after house and garden p
 ### Manual
 Copy `custom_components/plant_care` to `<config>/custom_components/` and restart Home Assistant.
 
-**Requirements:** Home Assistant 2026.7 or newer (the exact minimum version will be pinned before release).
+**Requirements:** Home Assistant 2026.8 or newer.
 
 ## Configuration
 

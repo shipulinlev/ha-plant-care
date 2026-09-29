@@ -114,8 +114,10 @@ custom_components/plant_care/
     models.py          # dataclasses: PlantConfig, SpeciesProfile, CareEvent, ClimateReading, CarePlan
     engine.py          # CareEngine
 tests/
+  conftest.py          # enables custom integrations for HA tests
   core/                # engine unit tests, no HA
-  ...                  # integration tests on pytest-homeassistant-custom-component
+    conftest.py        # overrides the HA-only autouse fixture with a no-op
+  test_*.py            # integration tests on pytest-homeassistant-custom-component
 hacs.json
 pyproject.toml         # ruff, mypy, pytest
 ```
@@ -143,12 +145,12 @@ pyproject.toml         # ruff, mypy, pytest
 
 ### Current HA APIs (verified, 2026)
 - Subentries: `ConfigFlow.async_get_supported_subentry_types()` → `{"plant": PlantSubentryFlow}`; in `reconfigure` use `self._get_entry()` and `self._get_reconfigure_subentry()`.
-- Since HA 2026.07 a device has exactly one config entry: read `device.config_entry_id` / `device.config_subentry_id`; `device.config_entries_subentries` is **deprecated**. Move a device with `async_update_device(new_config_entry_id=..., new_config_subentry_id=...)`.
+- Since HA 2026.8 a device has exactly one config entry (hence the minimum version 2026.8.0 in `hacs.json`): read `device.config_entry_id` / `device.config_subentry_id`; `device.config_entries_subentries` is **deprecated**. Move a device with `async_update_device(new_config_entry_id=..., new_config_subentry_id=...)`.
 - When unsure about an HA API, check current docs (context7: `/home-assistant/developers.home-assistant`) rather than memory.
 
 ### Testing (TDD)
 - Test first, then implementation. Especially for `core/engine.py`: every factor and edge case is covered by a test.
-- `tests/core/` does not use HA and runs fast.
+- `tests/core/` does not use HA and runs fast. Any new autouse fixture in `tests/conftest.py` that needs HA must get a no-op override in `tests/core/conftest.py`, or the core tests break on Windows.
 - Integration tests: `pytest-homeassistant-custom-component`, the `hass` fixture, `MockConfigEntry` with subentries, `aioclient_mock` for OpenPlantbook, no real network.
 - Must cover: config flow and subentry flow (including errors), area change → climate sources re-resolved, actions, entry unload without leaked listeners.
 

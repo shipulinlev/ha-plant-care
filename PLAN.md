@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 0. Project scaffolding
-**Next step:** skeleton of `custom_components/plant_care/` (`manifest.json`, `const.py`, `__init__.py`, `hacs.json`)
+**Next step:** CI (GitHub Actions); `gh` CLI setup is pending on the maintainer
 
 ---
 
@@ -20,8 +20,12 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Dev HA config has no `default_config`: `go2rtc` needs a binary.
 - [x] Agent skills setup (mattpocock-skills): GitHub Issues tracker, default triage labels, single-context domain docs (`docs/agents/`)
 - [ ] Install and authenticate the `gh` CLI (needed by the issue-tracker skills)
-- [ ] Skeleton of `custom_components/plant_care/`: `manifest.json`, `const.py`, empty `__init__.py`, `hacs.json`
-- [ ] Pin the minimum HA version (subentries + single config entry per device, ≥ 2026.07) in `manifest.json` / `hacs.json`
+- [x] Skeleton of `custom_components/plant_care/`: `manifest.json`, `const.py`, `__init__.py`, `hacs.json`
+  - `__init__.py` has `CONFIG_SCHEMA = config_entry_only_config_schema` (UI-only) and a no-op `async_setup` (actions will be registered there).
+  - `manifest.json`: `config_flow: false` until phase 3; `integration_type: hub`, `iot_class: cloud_polling` (OpenPlantbook).
+  - Tests: `tests/test_init.py` (manifest discovery, setup); `pythonpath = ["."]` in pytest config; `tests/core/conftest.py` overrides the HA autouse fixture so core tests run on Windows.
+- [x] Pin the minimum HA version: `2026.8.0` in `hacs.json` (`manifest.json` has no min-version field for custom integrations)
+  - Correction: the single-config-entry-per-device change landed in HA **2026.8**, not 2026.07 (developers blog 2026-07-21).
 - [ ] CI (GitHub Actions): pytest, ruff, mypy, hassfest, HACS validation
 
 ## Phase 1. Core: models and engine (no HA, TDD)
@@ -92,4 +96,5 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-09-29 | Dev container as the primary environment | HA cannot run natively on Windows; a container is closest to the real HA runtime |
 | 2026-09-29 | Python 3.14, dev dependencies via PEP 735 `[dependency-groups]` | HA 2026.9 requires Python ≥ 3.14.2; the integration is not installed as a package, so `pyproject.toml` is tooling-only |
 | 2026-09-29 | All repo content in English; `PLAN.md` is the roadmap, GitHub Issues hold tickets | Maintainer's choice; agent skills expect a GitHub issue tracker |
+| 2026-09-29 | Minimum HA version 2026.8.0 | Needs config subentries and the single-config-entry device registry API (2026.8) |
 | 2026-09-29 | Project is openly AI-assisted ("vibe coded") | Transparency for users; disclaimer in README |
