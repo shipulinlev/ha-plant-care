@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 0. Project scaffolding
-**Next step:** CI (GitHub Actions); `gh` CLI setup is pending on the maintainer
+**Next step:** confirm CI is green, then phase 1 (`core/models.py`)
 
 ---
 
@@ -19,7 +19,8 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Verified: a smoke test with the `hass` fixture passes, `scripts/develop` starts HA 2026.9.4 without errors, the frontend returns 200.
   - Dev HA config has no `default_config`: `go2rtc` needs a binary.
 - [x] Agent skills setup (mattpocock-skills): GitHub Issues tracker, default triage labels, single-context domain docs (`docs/agents/`)
-- [ ] Install and authenticate the `gh` CLI (needed by the issue-tracker skills)
+- [x] Install and authenticate the `gh` CLI (needed by the issue-tracker skills)
+  - Triage labels created on GitHub (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`; `wontfix` is a GitHub default).
 - [x] Skeleton of `custom_components/plant_care/`: `manifest.json`, `const.py`, `__init__.py`, `hacs.json`
   - `__init__.py` has `CONFIG_SCHEMA = config_entry_only_config_schema` (UI-only) and a no-op `async_setup` (actions will be registered there).
   - `manifest.json`: `config_flow: false` until phase 3; `integration_type: hub`, `iot_class: cloud_polling` (OpenPlantbook).
@@ -27,6 +28,7 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
 - [x] Pin the minimum HA version: `2026.8.0` in `hacs.json` (`manifest.json` has no min-version field for custom integrations)
   - Correction: the single-config-entry-per-device change landed in HA **2026.8**, not 2026.07 (developers blog 2026-07-21).
 - [~] CI (GitHub Actions): pytest, ruff, mypy, hassfest, HACS validation
+  - First run: lint/tests and hassfest green; HACS failed on missing license and topics. Fixed: MIT `LICENSE`, repo topics set via `gh`.
 
 ## Phase 1. Core: models and engine (no HA, TDD)
 - [ ] `core/models.py`: `PlantConfig`, `SpeciesProfile`, `CareEvent`, `ClimateReading`, `CarePlan`, status enums

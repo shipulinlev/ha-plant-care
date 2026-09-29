@@ -83,4 +83,4 @@ scripts/develop   # local HA with the integration at http://localhost:8123
 
 ## License
 
-Not chosen yet.
+[MIT](LICENSE).
