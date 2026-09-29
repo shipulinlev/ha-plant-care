@@ -3,8 +3,8 @@
 Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and mypy green) · `[-]` dropped.
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
-**Current phase:** 0. Project scaffolding
-**Next step:** confirm CI is green, then phase 1 (`core/models.py`)
+**Current phase:** 1. Core: models and engine
+**Next step:** phase 1, `core/models.py`
 
 ---
 
@@ -27,8 +27,8 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Tests: `tests/test_init.py` (manifest discovery, setup); `pythonpath = ["."]` in pytest config; `tests/core/conftest.py` overrides the HA autouse fixture so core tests run on Windows.
 - [x] Pin the minimum HA version: `2026.8.0` in `hacs.json` (`manifest.json` has no min-version field for custom integrations)
   - Correction: the single-config-entry-per-device change landed in HA **2026.8**, not 2026.07 (developers blog 2026-07-21).
-- [~] CI (GitHub Actions): pytest, ruff, mypy, hassfest, HACS validation
-  - First run: lint/tests and hassfest green; HACS failed on missing license and topics. Fixed: MIT `LICENSE`, repo topics set via `gh`.
+- [x] CI (GitHub Actions): pytest, ruff, mypy, hassfest, HACS validation
+  - First run: lint/tests and hassfest green; HACS failed on missing license and topics. Fixed: MIT `LICENSE`, repo topics set via `gh`; all three jobs green since `aaadee8`.
 
 ## Phase 1. Core: models and engine (no HA, TDD)
 - [ ] `core/models.py`: `PlantConfig`, `SpeciesProfile`, `CareEvent`, `ClimateReading`, `CarePlan`, status enums
