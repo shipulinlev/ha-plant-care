@@ -3,8 +3,8 @@
 Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and mypy green) · `[-]` dropped.
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
-**Current phase:** 1. Core: models and engine
-**Next step:** phase 1, `core/models.py`
+**Current phase:** 2. Storage and external data
+**Next step:** phase 2, `storage.py` (`CareLog`)
 
 ---
 
@@ -31,14 +31,21 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - First run: lint/tests and hassfest green; HACS failed on missing license and topics. Fixed: MIT `LICENSE`, repo topics set via `gh`; all three jobs green since `aaadee8`.
 
 ## Phase 1. Core: models and engine (no HA, TDD)
-- [ ] `core/models.py`: `PlantConfig`, `SpeciesProfile`, `CareEvent`, `ClimateReading`, `CarePlan`, status enums
-- [ ] Base watering interval: median of the last N intervals, fallback to `initial_watering_interval_days`
-- [ ] Climate multiplier from temperature and humidity relative to the species range, clamped to 0.5–1.5
-- [ ] Precipitation handling for outdoor plants
-- [ ] Soil moisture sensor priority
-- [ ] Feeding: interval + seasonal factor (hemisphere from latitude)
-- [ ] `ok/soon/due/overdue` statuses and `explanation`
-- [ ] Edge cases: no history, no climate, no species profile, future events, duplicate events
+- [x] `core/models.py`: `PlantConfig`, `SpeciesProfile`, `CareEvent`, `ClimateReading`, `CarePlan`, status enums
+  - Frozen keyword-only dataclasses; `CareEvent` / `Precipitation` reject naive datetimes. `ClimateStatus`: `ok` | `out_of_range` | `unknown`. `CarePlan` also carries `last_watered` / `last_fed`.
+- [x] Base watering interval: median of the last N intervals, fallback to `initial_watering_interval_days`
+  - `core/history.py`: future events ignored; events within 6 h of the previous one are merged (double button press).
+- [x] Climate multiplier from temperature and humidity relative to the species range, clamped to 0.5–1.5
+  - `core/climate_factor.py`: deviation = distance outside the range / range width; temp factor `1 - dev`, humidity factor `1 + dev` (signed), multiplied, then clamped. A variable counts only with a reading and both bounds.
+- [x] Precipitation handling for outdoor plants
+  - Each entry ≥ 5 mm counts as watering if it falls after the last watering and no later than the scheduled date; it restarts the interval. Forecast rain is trusted as is.
+- [x] Soil moisture sensor priority
+  - Dry → next = now (keeps `overdue` if already overdue); wet → status `ok`, next no earlier than now + 1 d. Ignored without the species soil range.
+- [x] Feeding: interval + seasonal factor (hemisphere from latitude)
+  - `core/season.py`: spring/summer x1.0, autumn x1.5, winter x2.0. No winter pause for now.
+- [x] `ok/soon/due/overdue` statuses and `explanation`
+  - `core/status.py`: `soon` within 1 d before, `due` from the date, `overdue` from 1 d after. All windows live in `EngineSettings`.
+- [x] Edge cases: no history, no climate, no species profile, future events, duplicate events
 
 ## Phase 2. Storage and external data
 - [ ] `storage.py`: `CareLog` on `Store` (version, migrations, deleting a plant's history)
@@ -83,6 +90,7 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
 - Light levels (`min/max_light_lux`) and placement recommendations
 - Repotting, misting, other care types
 - Plant import and export
+- Calibrate engine defaults (rain threshold, seasonal factors, soon/overdue windows) on real use; maybe a winter feeding pause option
 
 ## Decision log
 Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link it from its row.
@@ -100,4 +108,6 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-09-29 | Python 3.14, dev dependencies via PEP 735 `[dependency-groups]` | HA 2026.9 requires Python ≥ 3.14.2; the integration is not installed as a package, so `pyproject.toml` is tooling-only |
 | 2026-09-29 | All repo content in English; `PLAN.md` is the roadmap, GitHub Issues hold tickets | Maintainer's choice; agent skills expect a GitHub issue tracker |
 | 2026-09-29 | Minimum HA version 2026.8.0 | Needs config subentries and the single-config-entry device registry API (2026.8) |
+| 2026-09-29 | Engine defaults live in `EngineSettings`; no schedule without an anchor event | One place to calibrate; a new plant should not claim "needs water" before anything is known |
+| 2026-09-29 | `explanation` is English technical text, not translated | Attribute values cannot use HA translations; it is a debugging aid |
 | 2026-09-29 | Project is openly AI-assisted ("vibe coded") | Transparency for users; disclaimer in README |

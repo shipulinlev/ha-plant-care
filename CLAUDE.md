@@ -65,10 +65,11 @@ Out of scope (for now): a custom frontend (panel, Lovelace card), controlling ir
 Pure Python, **no `homeassistant` imports**, deterministic (the current time is passed in as a parameter).
 - **Base watering interval** = median of the last N (default 5) intervals in the CareLog. With fewer than 2 intervals, use `initial_watering_interval_days`.
 - **Climate multiplier**: how far temperature and humidity fall outside the species range. Hotter or drier than the range → shorter interval; cooler or more humid → longer. The multiplier is clamped (default 0.5–1.5).
-- **Outdoor**: past and forecast precipitation shift the watering date (rain ≥ threshold counts as watering).
+- **Outdoor**: past and forecast precipitation shift the watering date (rain ≥ threshold counts as watering). The engine compares each `Precipitation` entry against the threshold as is, so the caller aggregates forecast data per day.
 - **Soil sensor**: below `min_soil_moist` → water now; above `max_soil_moist` → no watering needed.
-- **Feeding**: user-defined interval plus a seasonal factor (pause or lengthen in winter; hemisphere derived from HA latitude).
-- Output (`CarePlan`): `next_watering`, `next_feeding`, `watering_status` / `feeding_status` (`ok` | `soon` | `due` | `overdue`), `climate_status`, `explanation` (a short explanation of the calculation, exposed as an attribute).
+- **Feeding**: user-defined interval times a seasonal factor (meteorological seasons, hemisphere from HA latitude; winter x2, autumn x1.5).
+- No logged watering or feeding (and no rain or soil reading to anchor on) → `next_*` and `*_status` are `None`.
+- Output (`CarePlan`): `next_watering`, `next_feeding`, `watering_status` / `feeding_status` (`ok` | `soon` | `due` | `overdue`), `climate_status`, `last_watered`, `last_fed`, `explanation` (a short English technical summary of the calculation, exposed as an attribute; not translated).
 
 ### 7. Coordinator (`coordinator.py`)
 - One `DataUpdateCoordinator` per config entry; it recomputes the `CarePlan` for every plant.
@@ -112,7 +113,11 @@ custom_components/plant_care/
   translations/ru.json
   core/                # pure logic, never imports homeassistant
     models.py          # dataclasses: PlantConfig, SpeciesProfile, CareEvent, ClimateReading, CarePlan
-    engine.py          # CareEngine
+    engine.py          # CareEngine + EngineSettings (defaults for every tunable)
+    history.py         # CareLog events -> deduplicated times, median interval
+    climate_factor.py  # temperature/humidity multiplier and climate_status
+    season.py          # meteorological season, feeding factor
+    status.py          # ok / soon / due / overdue
 tests/
   conftest.py          # enables custom integrations for HA tests
   core/                # engine unit tests, no HA
