@@ -70,3 +70,8 @@ exclude = ["^config/"]
 [[tool.mypy.overrides]]
 module = "tests.*"
 disallow_untyped_decorators = false
+
+[[tool.mypy.overrides]]
+# The HA test plugin ships without type information.
+module = "pytest_homeassistant_custom_component.*"
+ignore_missing_imports = true

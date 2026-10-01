@@ -3,8 +3,8 @@
 Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and mypy green) · `[-]` dropped.
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
-**Current phase:** 2. Storage and external data
-**Next step:** phase 2, `openplantbook.py` (API client)
+**Current phase:** 3. Integration: flows and devices
+**Next step:** phase 3, hub `ConfigFlow`
 
 ---
 
@@ -52,8 +52,12 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Key `plant_care.care_log`, version 1, `{"plants": {plant_id: [{kind, at}]}}`; times normalized to UTC; events sorted oldest first. Saved immediately (care events are rare). No migration code until the schema reaches version 2 (YAGNI).
 - [x] `storage.py`: OpenPlantbook profile cache with TTL
   - `ProfileCache`: key `plant_care.species_profiles`, version 1, TTL 30 days. `get` serves a profile of any age (offline use); `needs_refresh` tells the caller when to refetch; `async_remove` backs `refresh_species`. Only the fields of `SpeciesProfile` are cached (no light/EC until the engine uses them).
-- [ ] `openplantbook.py`: OAuth2 client credentials, token cache, search, detail, error and rate-limit handling
-- [ ] Client tests with `aioclient_mock`
+- [x] `openplantbook.py`: OAuth2 client credentials, token cache, search, detail, error and rate-limit handling
+  - Endpoints checked against the official SDK (`slaxor505/openplantbook-sdk-py`): `POST /token/` (form data), `GET /plant/search?alias=`, `GET /plant/detail/{pid}/`.
+  - `OpenPlantbookClient(session, client_id, client_secret)`: `async_authenticate` (credential check for the flow), `async_search` → `SpeciesMatch`, `async_get_profile` → `SpeciesProfile`. Token kept in memory, renewed 5 min before expiry and once on HTTP 401.
+  - Errors: `OpenPlantbookAuthError` (token 400/401/403, API 403, repeated 401), `OpenPlantbookRateLimitError` (429), otherwise `OpenPlantbookError` (network, timeout, other HTTP, bad JSON). The client does not log; callers decide.
+- [x] Client tests with `aioclient_mock`
+  - The `client` fixture must depend on `aioclient_mock`, or the HA session is created unmocked. `mypy` ignores missing types of `pytest_homeassistant_custom_component`.
 
 ## Phase 3. Integration: flows and devices
 - [ ] Hub `ConfigFlow`: OpenPlantbook credentials (validated), default weather entity; single instance
