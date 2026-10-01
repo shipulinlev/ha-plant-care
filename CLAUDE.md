@@ -151,6 +151,7 @@ pyproject.toml         # ruff, mypy, pytest
 ### Current HA APIs (verified, 2026)
 - Subentries: `ConfigFlow.async_get_supported_subentry_types()` → `{"plant": PlantSubentryFlow}`; in `reconfigure` use `self._get_entry()` and `self._get_reconfigure_subentry()`.
 - Since HA 2026.8 a device has exactly one config entry (hence the minimum version 2026.8.0 in `hacs.json`): read `device.config_entry_id` / `device.config_subentry_id`; `device.config_entries_subentries` is **deprecated**. Move a device with `async_update_device(new_config_entry_id=..., new_config_subentry_id=...)`.
+- Flow and service schemas: `voluptuous` (`import voluptuous as vol`). The developer docs already show `probatio`, but HA 2026.9 still types its flow API with `vol.Schema`; switch only after bumping the HA pin to a version that accepts `probatio`.
 - When unsure about an HA API, check current docs (context7: `/home-assistant/developers.home-assistant`) rather than memory.
 
 ### Testing (TDD)

@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Plant Care",
+        "description": "Connect to OpenPlantbook for species care ranges. Create API credentials at {api_keys_url}.",
+        "data": {
+          "client_id": "Client ID",
+          "client_secret": "Client secret",
+          "weather_entity": "Default weather entity"
+        },
+        "data_description": {
+          "client_id": "OpenPlantbook API client ID.",
+          "client_secret": "OpenPlantbook API client secret.",
+          "weather_entity": "Used for outdoor plants (garden, balcony). Can be overridden per plant."
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "OpenPlantbook rejected the client ID or secret.",
+      "rate_limited": "OpenPlantbook rate limit reached. Try again later.",
+      "cannot_connect": "Could not connect to OpenPlantbook.",
+      "unknown": "Unexpected error."
+    },
+    "abort": {
+      "single_instance_allowed": "Plant Care is already set up. Add plants to the existing entry."
+    }
+  }
+}

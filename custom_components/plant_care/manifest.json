@@ -2,11 +2,12 @@
   "domain": "plant_care",
   "name": "Plant Care",
   "codeowners": ["@shipulinlev"],
-  "config_flow": false,
+  "config_flow": true,
   "documentation": "https://github.com/shipulinlev/ha-plant-care",
   "integration_type": "hub",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/shipulinlev/ha-plant-care/issues",
   "requirements": [],
+  "single_config_entry": true,
   "version": "0.0.1"
 }

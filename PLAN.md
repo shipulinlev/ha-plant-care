@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 3. Integration: flows and devices
-**Next step:** phase 3, hub `ConfigFlow`
+**Next step:** phase 3, hub options/reconfigure
 
 ---
 
@@ -60,7 +60,10 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - The `client` fixture must depend on `aioclient_mock`, or the HA session is created unmocked. `mypy` ignores missing types of `pytest_homeassistant_custom_component`.
 
 ## Phase 3. Integration: flows and devices
-- [ ] Hub `ConfigFlow`: OpenPlantbook credentials (validated), default weather entity; single instance
+- [x] Hub `ConfigFlow`: OpenPlantbook credentials (validated), default weather entity; single instance
+  - Single instance via `"single_config_entry": true` in the manifest (no check in the flow). Data: `client_id`, `client_secret`, optional `weather_entity`. Errors: `invalid_auth`, `rate_limited`, `cannot_connect`, `unknown`; entered values are kept on error.
+  - Minimal `async_setup_entry` / `async_unload_entry` (no-op) so the created entry loads; runtime data arrives with the coordinator.
+  - Hub step strings in en/ru; the OpenPlantbook URL is a description placeholder (hassfest rejects URLs in translations). hassfest passes locally (`docker run --rm -v "$PWD:/github/workspace" ghcr.io/home-assistant/hassfest`).
 - [ ] Hub options/reconfigure
 - [ ] `PlantSubentryFlow.user`: name, species search, `location_type`, area, soil sensor, intervals
 - [ ] `PlantSubentryFlow.reconfigure`
@@ -117,3 +120,4 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-09-29 | Engine defaults live in `EngineSettings`; no schedule without an anchor event | One place to calibrate; a new plant should not claim "needs water" before anything is known |
 | 2026-09-29 | `explanation` is English technical text, not translated | Attribute values cannot use HA translations; it is a debugging aid |
 | 2026-09-29 | Project is openly AI-assisted ("vibe coded") | Transparency for users; disclaimer in README |
+| 2026-10-01 | Flow schemas use `voluptuous`, not `probatio` | Current developer docs show `probatio`, but HA 2026.9.4 (our pin) types `FlowHandler` with `vol.Schema` and no core flow uses `probatio` yet; revisit when the pin is bumped |
