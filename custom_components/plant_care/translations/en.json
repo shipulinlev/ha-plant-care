@@ -14,6 +14,20 @@
           "client_secret": "OpenPlantbook API client secret.",
           "weather_entity": "Used for outdoor plants (garden, balcony). Can be overridden per plant."
         }
+      },
+      "reconfigure": {
+        "title": "Plant Care settings",
+        "description": "Change the OpenPlantbook credentials ({api_keys_url}) or the default weather entity.",
+        "data": {
+          "client_id": "Client ID",
+          "client_secret": "Client secret",
+          "weather_entity": "Default weather entity"
+        },
+        "data_description": {
+          "client_id": "OpenPlantbook API client ID.",
+          "client_secret": "OpenPlantbook API client secret.",
+          "weather_entity": "Used for outdoor plants (garden, balcony). Can be overridden per plant."
+        }
       }
     },
     "error": {
@@ -23,7 +37,8 @@
       "unknown": "Unexpected error."
     },
     "abort": {
-      "single_instance_allowed": "Plant Care is already set up. Add plants to the existing entry."
+      "single_instance_allowed": "Plant Care is already set up. Add plants to the existing entry.",
+      "reconfigure_successful": "Plant Care settings updated."
     }
   }
 }

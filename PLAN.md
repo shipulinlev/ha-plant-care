@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 3. Integration: flows and devices
-**Next step:** phase 3, hub options/reconfigure
+**Next step:** phase 3, `PlantSubentryFlow.user`
 
 ---
 
@@ -64,7 +64,8 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Single instance via `"single_config_entry": true` in the manifest (no check in the flow). Data: `client_id`, `client_secret`, optional `weather_entity`. Errors: `invalid_auth`, `rate_limited`, `cannot_connect`, `unknown`; entered values are kept on error.
   - Minimal `async_setup_entry` / `async_unload_entry` (no-op) so the created entry loads; runtime data arrives with the coordinator.
   - Hub step strings in en/ru; the OpenPlantbook URL is a description placeholder (hassfest rejects URLs in translations). hassfest passes locally (`docker run --rm -v "$PWD:/github/workspace" ghcr.io/home-assistant/hassfest`).
-- [ ] Hub options/reconfigure
+- [x] Hub options/reconfigure
+  - `reconfigure` step only, no options flow: the hub has just three settings and credentials must be re-checked anyway. Same form as `user`, prefilled; saves with `async_update_reload_and_abort(data=...)` (full replace, so clearing the weather entity removes it).
 - [ ] `PlantSubentryFlow.user`: name, species search, `location_type`, area, soil sensor, intervals
 - [ ] `PlantSubentryFlow.reconfigure`
 - [ ] Device per subentry with area; deleting a subentry removes the device and history

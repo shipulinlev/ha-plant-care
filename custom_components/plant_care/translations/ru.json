@@ -14,6 +14,20 @@
           "client_secret": "Client secret для API OpenPlantbook.",
           "weather_entity": "Используется для уличных растений (сад, балкон). Можно переопределить для каждого растения."
         }
+      },
+      "reconfigure": {
+        "title": "Настройки Plant Care",
+        "description": "Измените ключи OpenPlantbook ({api_keys_url}) или погоду по умолчанию.",
+        "data": {
+          "client_id": "Client ID",
+          "client_secret": "Client secret",
+          "weather_entity": "Погода по умолчанию"
+        },
+        "data_description": {
+          "client_id": "Client ID для API OpenPlantbook.",
+          "client_secret": "Client secret для API OpenPlantbook.",
+          "weather_entity": "Используется для уличных растений (сад, балкон). Можно переопределить для каждого растения."
+        }
       }
     },
     "error": {
@@ -23,7 +37,8 @@
       "unknown": "Непредвиденная ошибка."
     },
     "abort": {
-      "single_instance_allowed": "Plant Care уже настроен. Добавляйте растения в существующую запись."
+      "single_instance_allowed": "Plant Care уже настроен. Добавляйте растения в существующую запись.",
+      "reconfigure_successful": "Настройки Plant Care обновлены."
     }
   }
 }
