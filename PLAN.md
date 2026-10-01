@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 3. Integration: flows and devices
-**Next step:** phase 3, `PlantSubentryFlow.user`
+**Next step:** phase 3, `PlantSubentryFlow.reconfigure`
 
 ---
 
@@ -66,7 +66,11 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Hub step strings in en/ru; the OpenPlantbook URL is a description placeholder (hassfest rejects URLs in translations). hassfest passes locally (`docker run --rm -v "$PWD:/github/workspace" ghcr.io/home-assistant/hassfest`).
 - [x] Hub options/reconfigure
   - `reconfigure` step only, no options flow: the hub has just three settings and credentials must be re-checked anyway. Same form as `user`, prefilled; saves with `async_update_reload_and_abort(data=...)` (full replace, so clearing the weather entity removes it).
-- [ ] `PlantSubentryFlow.user`: name, species search, `location_type`, area, soil sensor, intervals
+- [x] `PlantSubentryFlow.user`: name, species search, `location_type`, area, soil sensor, intervals
+  - Two steps (maintainer's choice): `user` = name + optional search text; `details` = species dropdown (only after a search; empty = no species), location (default indoor), area, soil moisture sensor, per-plant weather override, watering/feeding intervals (defaults 7 / 30 d).
+  - Search errors (`invalid_auth`, `rate_limited`, `cannot_connect`, field error `no_species_found`) keep the user on step one; clearing the search continues without a species.
+  - A subentry flow cannot learn its new `subentry_id`, so the area travels as a one-time `area_id` key in the subentry data; device creation (next tasks) must apply it and remove the key.
+  - Species range overrides are left to `reconfigure`. `config_flow.py` is at 270 lines: move `PlantSubentryFlow` to `plant_flow.py` when adding `reconfigure`.
 - [ ] `PlantSubentryFlow.reconfigure`
 - [ ] Device per subentry with area; deleting a subentry removes the device and history
 - [ ] en/ru translations for all flows
@@ -121,4 +125,6 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-09-29 | Engine defaults live in `EngineSettings`; no schedule without an anchor event | One place to calibrate; a new plant should not claim "needs water" before anything is known |
 | 2026-09-29 | `explanation` is English technical text, not translated | Attribute values cannot use HA translations; it is a debugging aid |
 | 2026-09-29 | Project is openly AI-assisted ("vibe coded") | Transparency for users; disclaimer in README |
+| 2026-10-01 | Plant flow: search, then pick species | Maintainer's choice; no need to look up PIDs by hand, and a plant can still be added when OpenPlantbook is down |
+| 2026-10-01 | Area passed as a one-time `area_id` in subentry data, removed once applied to the device | HA generates the `subentry_id` after the flow finishes, so the flow cannot write the device area itself; the device registry stays the only lasting home of the area |
 | 2026-10-01 | Flow schemas use `voluptuous`, not `probatio` | Current developer docs show `probatio`, but HA 2026.9.4 (our pin) types `FlowHandler` with `vol.Schema` and no core flow uses `probatio` yet; revisit when the pin is bumped |

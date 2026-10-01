@@ -40,5 +40,61 @@
       "single_instance_allowed": "Plant Care is already set up. Add plants to the existing entry.",
       "reconfigure_successful": "Plant Care settings updated."
     }
+  },
+  "config_subentries": {
+    "plant": {
+      "entry_type": "Plant",
+      "initiate_flow": {
+        "user": "Add plant"
+      },
+      "step": {
+        "user": {
+          "title": "Add plant",
+          "description": "Name the plant. To use species care ranges, type part of its name to search OpenPlantbook; leave the search empty to add the plant without a species.",
+          "data": {
+            "name": "Name",
+            "species_search": "Search species"
+          },
+          "data_description": {
+            "species_search": "Latin or common name, e.g. monstera."
+          }
+        },
+        "details": {
+          "title": "Plant details",
+          "data": {
+            "species_pid": "Species",
+            "location_type": "Location",
+            "area_id": "Area",
+            "soil_moisture_entity": "Soil moisture sensor",
+            "weather_entity": "Weather entity",
+            "initial_watering_interval_days": "Watering interval",
+            "feeding_interval_days": "Feeding interval"
+          },
+          "data_description": {
+            "species_pid": "Matches from OpenPlantbook. Leave empty to add the plant without a species.",
+            "location_type": "Indoor plants use room sensors; outdoor plants use weather and rain.",
+            "area_id": "Room or place where the plant lives. Change it later by moving the plant's device.",
+            "soil_moisture_entity": "Optional. When set, it takes priority over the estimate.",
+            "weather_entity": "Outdoor plants only. Leave empty to use the hub default.",
+            "initial_watering_interval_days": "Starting interval in days; it adapts to the watering you log.",
+            "feeding_interval_days": "Days between feedings in spring and summer; longer in autumn and winter."
+          }
+        }
+      },
+      "error": {
+        "invalid_auth": "OpenPlantbook rejected the client ID or secret.",
+        "rate_limited": "OpenPlantbook rate limit reached. Try again later.",
+        "cannot_connect": "Could not connect to OpenPlantbook.",
+        "no_species_found": "No species matches this search. Try another name or clear the field."
+      }
+    }
+  },
+  "selector": {
+    "location_type": {
+      "options": {
+        "indoor": "Indoor",
+        "outdoor": "Outdoor"
+      }
+    }
   }
 }

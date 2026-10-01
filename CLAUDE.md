@@ -34,13 +34,13 @@ Out of scope (for now): a custom frontend (panel, Lovelace card), controlling ir
 - **Config entry (hub)**, one per installation: OpenPlantbook credentials (`client_id`, `client_secret`) and the default `weather` entity for outdoor plants.
 - **Plant = config subentry** of type `plant`. Created through the subentry flow `user` step, edited through `reconfigure`, deleted the standard way.
 - **Each plant maps to exactly one device**, bound to the subentry (`config_subentry_id`). All plant entities belong to that device.
-- Subentry data: `name`, `species_pid` (OpenPlantbook PID, optional), `location_type` (`indoor` | `outdoor`), `soil_moisture_entity` (optional), `initial_watering_interval_days`, `feeding_interval_days`, species range overrides.
+- Subentry data: `name`, `species_pid` (OpenPlantbook PID, optional), `location_type` (`indoor` | `outdoor`), `soil_moisture_entity` (optional), `weather_entity` (optional per-plant override of the hub default), `initial_watering_interval_days`, `feeding_interval_days`, species range overrides.
 
 ### 2. Room = the device's area
 - The area is stored **only** in the device registry and is **not duplicated** in subentry data.
 - Moving a plant: the user changes the device area in the standard UI, or calls `plant_care.move`, which does the same.
 - The integration listens to `EVENT_DEVICE_REGISTRY_UPDATED` and re-resolves climate sources when the area changes.
-- When a plant is created, the area is picked in the subentry flow (`AreaSelector`) and written to the device immediately.
+- When a plant is created, the area is picked in the subentry flow (`AreaSelector`). The flow cannot know the new `subentry_id`, so it passes the area as a one-time `area_id` key in the subentry data; device creation applies it to the device and removes the key. No other code may read `area_id` from subentry data.
 
 ### 3. Climate sources (`climate.py`, `ClimateResolver`)
 - **indoor**: `sensor` entities in the plant's area with `device_class` `temperature` / `humidity`. An entity's area comes from the entity registry, falling back to its device's area. With several sensors, take the median. Ignore `unavailable` / `unknown`.

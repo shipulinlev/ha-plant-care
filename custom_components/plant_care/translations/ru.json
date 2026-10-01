@@ -40,5 +40,61 @@
       "single_instance_allowed": "Plant Care уже настроен. Добавляйте растения в существующую запись.",
       "reconfigure_successful": "Настройки Plant Care обновлены."
     }
+  },
+  "config_subentries": {
+    "plant": {
+      "entry_type": "Растение",
+      "initiate_flow": {
+        "user": "Добавить растение"
+      },
+      "step": {
+        "user": {
+          "title": "Добавить растение",
+          "description": "Назовите растение. Чтобы использовать нормы ухода для вида, введите часть названия для поиска в OpenPlantbook; оставьте поиск пустым, чтобы добавить растение без вида.",
+          "data": {
+            "name": "Название",
+            "species_search": "Поиск вида"
+          },
+          "data_description": {
+            "species_search": "Латинское или обиходное название, например monstera."
+          }
+        },
+        "details": {
+          "title": "Параметры растения",
+          "data": {
+            "species_pid": "Вид",
+            "location_type": "Расположение",
+            "area_id": "Пространство",
+            "soil_moisture_entity": "Датчик влажности почвы",
+            "weather_entity": "Погода",
+            "initial_watering_interval_days": "Интервал полива",
+            "feeding_interval_days": "Интервал подкормки"
+          },
+          "data_description": {
+            "species_pid": "Найденные в OpenPlantbook виды. Оставьте пустым, чтобы добавить растение без вида.",
+            "location_type": "Комнатные растения используют датчики помещения, уличные — погоду и осадки.",
+            "area_id": "Комната или место, где растёт растение. Позже его можно сменить, переместив устройство растения.",
+            "soil_moisture_entity": "Необязательно. Если указан, он важнее расчётной оценки.",
+            "weather_entity": "Только для уличных растений. Оставьте пустым, чтобы использовать погоду по умолчанию.",
+            "initial_watering_interval_days": "Начальный интервал в днях; он подстраивается под отмеченные поливы.",
+            "feeding_interval_days": "Дней между подкормками весной и летом; осенью и зимой дольше."
+          }
+        }
+      },
+      "error": {
+        "invalid_auth": "OpenPlantbook отклонил Client ID или secret.",
+        "rate_limited": "Превышен лимит запросов OpenPlantbook. Попробуйте позже.",
+        "cannot_connect": "Не удалось подключиться к OpenPlantbook.",
+        "no_species_found": "По этому запросу виды не найдены. Попробуйте другое название или очистите поле."
+      }
+    }
+  },
+  "selector": {
+    "location_type": {
+      "options": {
+        "indoor": "В помещении",
+        "outdoor": "На улице"
+      }
+    }
   }
 }
