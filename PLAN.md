@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 2. Storage and external data
-**Next step:** phase 2, `storage.py` (`CareLog`)
+**Next step:** phase 2, `storage.py` (OpenPlantbook profile cache)
 
 ---
 
@@ -48,7 +48,8 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
 - [x] Edge cases: no history, no climate, no species profile, future events, duplicate events
 
 ## Phase 2. Storage and external data
-- [ ] `storage.py`: `CareLog` on `Store` (version, migrations, deleting a plant's history)
+- [x] `storage.py`: `CareLog` on `Store` (version, migrations, deleting a plant's history)
+  - Key `plant_care.care_log`, version 1, `{"plants": {plant_id: [{kind, at}]}}`; times normalized to UTC; events sorted oldest first. Saved immediately (care events are rare). No migration code until the schema reaches version 2 (YAGNI).
 - [ ] `storage.py`: OpenPlantbook profile cache with TTL
 - [ ] `openplantbook.py`: OAuth2 client credentials, token cache, search, detail, error and rate-limit handling
 - [ ] Client tests with `aioclient_mock`
