@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 4. Climate and coordinator
-**Next step:** phase 4, `ClimateResolver` for indoor plants (area sensors)
+**Next step:** phase 4, outdoor climate (weather entity + `weather.get_forecasts`)
 
 ---
 
@@ -84,7 +84,9 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - Strings were written with each flow; this task added `tests/test_translations.py` as a guard: `en.json` equals `strings.json`, `ru.json` has exactly the same keys and placeholders, and every form field of every flow step (driven through the real flows) has a label. Each check was mutation-tested.
 
 ## Phase 4. Climate and coordinator
-- [ ] `ClimateResolver`: area sensors (entity area or its device's area), median, ignore unavailable
+- [x] `ClimateResolver`: area sensors (entity area or its device's area), median, ignore unavailable
+  - Plain functions in `climate.py` for now: `async_indoor_sources(hass, area_id)` → `IndoorSources` (sorted temperature/humidity entity ids, `entity_ids` for subscriptions) and `read_indoor(hass, sources, soil_entity)` → `ClimateReading`. A class only if the outdoor forecast cache needs one.
+  - Device class: the user's override wins over the original; disabled entities are skipped. Temperatures are converted to °C (species ranges are in °C); unknown units and non-finite values are skipped.
 - [ ] `ClimateResolver`: weather + `weather.get_forecasts` for outdoor
 - [ ] React to device area changes (`EVENT_DEVICE_REGISTRY_UPDATED`) → rebuild subscriptions
 - [ ] `DataUpdateCoordinator`: timer + state events + CareLog events
