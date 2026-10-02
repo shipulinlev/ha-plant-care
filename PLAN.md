@@ -3,8 +3,8 @@
 Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and mypy green) · `[-]` dropped.
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
-**Current phase:** 4. Climate and coordinator
-**Next step:** phase 4, react to device area changes
+**Current phase:** 5. Entities and actions
+**Next step:** phase 5, `entity.py` base class
 
 ---
 
@@ -91,9 +91,13 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - `climate.read_outdoor(hass, weather_entity, soil_entity)`: temperature (to °C) and humidity from the weather entity's attributes.
   - `rain.py` `RainTracker`: daily forecast (hourly fallback, summed per local day), converted to mm, fetched at most once per hour per entity. Weather entities only forecast, so a day keeps its last forecast once it has passed (14 days kept): that approximates past rain. Fetch errors are logged; known days are kept.
   - In memory only: after a restart past rain is unknown until it is forecast again (Backlog).
-- [ ] React to device area changes (`EVENT_DEVICE_REGISTRY_UPDATED`) → rebuild subscriptions
-- [ ] `DataUpdateCoordinator`: timer + state events + CareLog events
-- [ ] Clean entry unload (all listeners removed)
+- [x] React to device area changes (`EVENT_DEVICE_REGISTRY_UPDATED`) → rebuild subscriptions
+  - Done together with the coordinator (the subscriptions are its own). Any device area change and any entity registry change of area, device, device class or enabled state triggers an immediate refresh, which re-resolves sources and rebuilds the state subscription. Moving a sensor counts, not only moving the plant.
+- [x] `DataUpdateCoordinator`: timer + state events + CareLog events
+  - `PlantCareCoordinator` (`coordinator.py`) + `plants.py` (subentry → `PlantConfig`, profile + overrides). 30 min timer; source state changes are debounced; `async_log_care(event)` stores and refreshes (for phase 5 buttons/actions).
+  - Species profile refetched when stale; on failure the cache is used and the retry waits 1 h, so an offline OpenPlantbook never blocks setup.
+- [x] Clean entry unload (all listeners removed)
+  - Base coordinator shuts down with the entry; `async_shutdown` closes the state subscription; registry listeners use `entry.async_on_unload`. A test counts open state subscriptions (mutation-checked: dropping the unsubscribe fails it).
 
 ## Phase 5. Entities and actions
 - [ ] `entity.py`: base class with `device_info` and `unique_id`
