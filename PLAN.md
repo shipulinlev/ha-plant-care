@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 3. Integration: flows and devices
-**Next step:** phase 3, `PlantSubentryFlow.reconfigure`
+**Next step:** phase 3, device per subentry with area
 
 ---
 
@@ -71,7 +71,10 @@ Update rules are in `CLAUDE.md` ("Mandatory rule: PLAN.md"). Items tracked as Gi
   - Search errors (`invalid_auth`, `rate_limited`, `cannot_connect`, field error `no_species_found`) keep the user on step one; clearing the search continues without a species.
   - A subentry flow cannot learn its new `subentry_id`, so the area travels as a one-time `area_id` key in the subentry data; device creation (next tasks) must apply it and remove the key.
   - Species range overrides are left to `reconfigure`. `config_flow.py` is at 270 lines: move `PlantSubentryFlow` to `plant_flow.py` when adding `reconfigure`.
-- [ ] `PlantSubentryFlow.reconfigure`
+- [x] `PlantSubentryFlow.reconfigure`
+  - Same two steps as adding: `reconfigure` (name prefilled, optional new search) → `reconfigure_details` (prefilled; no area, since the plant moves with its device; plus species range overrides `min/max_temp`, `min/max_env_humid`, `min/max_soil_moist`). A minimum above its maximum is `invalid_range`.
+  - Species: no new search keeps it; after a search the dropdown decides, and leaving it empty removes the species. A pending `area_id` handoff is carried over. Saves with `async_update_reload_and_abort` (full replace, so cleared fields disappear).
+  - `PlantSubentryFlow` moved to `plant_flow.py`; flow helpers shared with the hub flow live in `flow_helpers.py`.
 - [ ] Device per subentry with area; deleting a subentry removes the device and history
 - [ ] en/ru translations for all flows
 

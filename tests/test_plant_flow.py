@@ -4,7 +4,7 @@ from collections.abc import Iterator
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
-from homeassistant.config_entries import SOURCE_USER
+from homeassistant.config_entries import SOURCE_USER, ConfigSubentryData
 from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResultType
@@ -53,7 +53,7 @@ def hub_entry(hass: HomeAssistant) -> MockConfigEntry:
 def mock_search() -> Iterator[AsyncMock]:
     """Stand in for the OpenPlantbook species search."""
     with patch(
-        "custom_components.plant_care.config_flow.OpenPlantbookClient.async_search",
+        "custom_components.plant_care.flow_helpers.OpenPlantbookClient.async_search",
         autospec=True,
         return_value=[MONSTERA, ADANSONII],
     ) as search:
@@ -242,3 +242,152 @@ async def test_search_errors_allow_continuing_without_species(
 
     result = await _configure(hass, result, {CONF_NAME: "Ficus"})
     assert result["step_id"] == "details"
+
+
+OLD_PLANT = {
+    CONF_NAME: "Monstera",
+    CONF_SPECIES_PID: "monstera deliciosa",
+    CONF_LOCATION_TYPE: "indoor",
+    CONF_SOIL_MOISTURE_ENTITY: "sensor.monstera_moisture",
+    CONF_WATERING_INTERVAL: 7,
+    CONF_FEEDING_INTERVAL: 30,
+    "min_temp": 12.0,
+}
+NEW_DETAILS = {
+    CONF_LOCATION_TYPE: "outdoor",
+    CONF_WEATHER_ENTITY: "weather.balcony",
+    CONF_WATERING_INTERVAL: 4,
+    CONF_FEEDING_INTERVAL: 14,
+    "min_temp": 15.0,
+    "max_temp": 30.0,
+}
+
+
+def _hub_with_plant(hass: HomeAssistant, plant: dict[str, Any]) -> MockConfigEntry:
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data={CONF_CLIENT_ID: "my-id", CONF_CLIENT_SECRET: "secret"},
+        subentries_data=[
+            ConfigSubentryData(
+                data=plant,
+                subentry_type=SUBENTRY_TYPE_PLANT,
+                title=plant[CONF_NAME],
+                unique_id=None,
+            )
+        ],
+    )
+    entry.add_to_hass(hass)
+    return entry
+
+
+def _suggested(result: Any) -> dict[str, Any]:
+    return {
+        str(key): key.description["suggested_value"]
+        for key in result["data_schema"].schema
+        if key.description and "suggested_value" in key.description
+    }
+
+
+async def test_reconfigure_keeps_species_and_replaces_details(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """Without a new search the species stays; details and overrides are replaced."""
+    entry = _hub_with_plant(hass, OLD_PLANT)
+    (subentry_id,) = entry.subentries
+
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+    assert result["step_id"] == "reconfigure"
+    assert _suggested(result) == {CONF_NAME: "Monstera"}
+
+    result = await _configure(hass, result, {CONF_NAME: "Big monstera"})
+    assert result["step_id"] == "reconfigure_details"
+    assert CONF_SPECIES_PID not in _fields(result)
+    assert CONF_AREA_ID not in _fields(result)
+    assert _suggested(result) == {
+        key: value
+        for key, value in OLD_PLANT.items()
+        if key not in (CONF_NAME, CONF_SPECIES_PID)
+    }
+    mock_search.assert_not_awaited()
+
+    result = await _configure(hass, result, NEW_DETAILS)
+
+    assert result["type"] is FlowResultType.ABORT
+    assert result["reason"] == "reconfigure_successful"
+    subentry = entry.subentries[subentry_id]
+    assert subentry.title == "Big monstera"
+    assert dict(subentry.data) == {
+        CONF_NAME: "Big monstera",
+        CONF_SPECIES_PID: "monstera deliciosa",
+        **NEW_DETAILS,
+    }
+
+
+async def test_reconfigure_with_search_changes_species(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """A new search offers the matches and stores the chosen species."""
+    entry = _hub_with_plant(hass, OLD_PLANT)
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+
+    result = await _configure(
+        hass, result, {CONF_NAME: "Monstera", CONF_SPECIES_SEARCH: "adansonii"}
+    )
+    assert CONF_SPECIES_PID in _fields(result)
+
+    result = await _configure(
+        hass, result, {CONF_SPECIES_PID: "monstera adansonii", **NEW_DETAILS}
+    )
+
+    assert result["reason"] == "reconfigure_successful"
+    assert entry.subentries[subentry_id].data[CONF_SPECIES_PID] == "monstera adansonii"
+
+
+async def test_reconfigure_rejects_inverted_range(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """A minimum above its maximum is a form error and nothing is saved."""
+    entry = _hub_with_plant(hass, OLD_PLANT)
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+    result = await _configure(hass, result, {CONF_NAME: "Monstera"})
+
+    result = await _configure(
+        hass, result, {**NEW_DETAILS, "min_temp": 31.0, "max_temp": 30.0}
+    )
+
+    assert result["step_id"] == "reconfigure_details"
+    assert result["errors"] == {"base": "invalid_range"}
+    assert dict(entry.subentries[subentry_id].data) == OLD_PLANT
+
+
+async def test_reconfigure_keeps_pending_area_handoff(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """An area not yet applied to the device survives a reconfigure."""
+    entry = _hub_with_plant(hass, {**OLD_PLANT, CONF_AREA_ID: "kitchen"})
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+    result = await _configure(hass, result, {CONF_NAME: "Monstera"})
+
+    result = await _configure(hass, result, NEW_DETAILS)
+
+    assert entry.subentries[subentry_id].data[CONF_AREA_ID] == "kitchen"
+
+
+async def test_reconfigure_search_then_empty_species_removes_it(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """After a new search, leaving the species empty drops the old one."""
+    entry = _hub_with_plant(hass, OLD_PLANT)
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+    result = await _configure(
+        hass, result, {CONF_NAME: "Monstera", CONF_SPECIES_SEARCH: "monstera"}
+    )
+
+    result = await _configure(hass, result, NEW_DETAILS)
+
+    assert result["reason"] == "reconfigure_successful"
+    assert CONF_SPECIES_PID not in entry.subentries[subentry_id].data

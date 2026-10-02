@@ -24,7 +24,7 @@ CREDENTIALS = {CONF_CLIENT_ID: "my-id", CONF_CLIENT_SECRET: "my-secret"}
 def mock_authenticate() -> Iterator[AsyncMock]:
     """Stand in for the OpenPlantbook credential check."""
     with patch(
-        "custom_components.plant_care.config_flow.OpenPlantbookClient.async_authenticate",
+        "custom_components.plant_care.flow_helpers.OpenPlantbookClient.async_authenticate",
         autospec=True,
     ) as authenticate:
         yield authenticate

@@ -25,3 +25,11 @@ CONF_SPECIES_SEARCH: Final = "species_search"
 
 DEFAULT_WATERING_INTERVAL_DAYS: Final = 7
 DEFAULT_FEEDING_INTERVAL_DAYS: Final = 30
+
+# Plant subentry data: optional species range overrides, as (min, max) pairs
+# named like the SpeciesProfile fields they replace.
+RANGE_OVERRIDES: Final = (
+    ("min_temp", "max_temp"),
+    ("min_env_humid", "max_env_humid"),
+    ("min_soil_moist", "max_soil_moist"),
+)

@@ -97,7 +97,9 @@ custom_components/plant_care/
   __init__.py          # async_setup (actions), async_setup_entry/unload, device registry listener
   manifest.json
   const.py
-  config_flow.py       # PlantCareConfigFlow (hub) + PlantSubentryFlow (user / reconfigure)
+  config_flow.py       # PlantCareConfigFlow (hub: user / reconfigure)
+  plant_flow.py        # PlantSubentryFlow (user -> details, reconfigure -> reconfigure_details)
+  flow_helpers.py      # OpenPlantbook client from hub data, error -> form error key
   coordinator.py
   entity.py            # PlantCareEntity: device_info, unique_id
   sensor.py
