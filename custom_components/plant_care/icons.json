@@ -1,0 +1,33 @@
+{
+  "entity": {
+    "sensor": {
+      "next_watering": {
+        "default": "mdi:watering-can"
+      },
+      "next_feeding": {
+        "default": "mdi:sprout"
+      },
+      "watering_status": {
+        "default": "mdi:water-check",
+        "state": {
+          "soon": "mdi:water-alert",
+          "due": "mdi:water-alert",
+          "overdue": "mdi:water-remove"
+        }
+      },
+      "feeding_status": {
+        "default": "mdi:sprout",
+        "state": {
+          "due": "mdi:sprout-outline",
+          "overdue": "mdi:sprout-outline"
+        }
+      },
+      "last_watered": {
+        "default": "mdi:water-outline"
+      },
+      "last_fed": {
+        "default": "mdi:leaf"
+      }
+    }
+  }
+}

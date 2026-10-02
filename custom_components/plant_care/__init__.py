@@ -1,5 +1,6 @@
 """The Plant Care integration."""
 
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
@@ -13,6 +14,8 @@ from .storage import CareLog, ProfileCache
 
 # Configured through the UI only; YAML config for the domain is rejected.
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
+
+PLATFORMS: list[Platform] = [Platform.SENSOR]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -43,6 +46,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: PlantCareConfigEntry) ->
     entry.runtime_data = PlantCareRuntimeData(
         care_log=care_log, coordinator=coordinator
     )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
 
     # Registered last: the area handoff above updates subentries, and that
     # must not trigger a reload of the entry being set up.
@@ -52,7 +56,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: PlantCareConfigEntry) ->
 
 async def async_unload_entry(hass: HomeAssistant, entry: PlantCareConfigEntry) -> bool:
     """Unload the hub; the coordinator shuts down with the entry."""
-    return True
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def _async_reload(hass: HomeAssistant, entry: PlantCareConfigEntry) -> None:

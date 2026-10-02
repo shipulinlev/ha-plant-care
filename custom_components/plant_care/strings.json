@@ -138,5 +138,52 @@
         "outdoor": "Outdoor"
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "next_watering": {
+        "name": "Next watering"
+      },
+      "next_feeding": {
+        "name": "Next feeding"
+      },
+      "last_watered": {
+        "name": "Last watered"
+      },
+      "last_fed": {
+        "name": "Last fed"
+      },
+      "watering_status": {
+        "name": "Watering status",
+        "state": {
+          "ok": "OK",
+          "soon": "Soon",
+          "due": "Due",
+          "overdue": "Overdue"
+        },
+        "state_attributes": {
+          "climate_status": {
+            "name": "Climate",
+            "state": {
+              "ok": "In range",
+              "out_of_range": "Out of range",
+              "unknown": "Unknown"
+            }
+          },
+          "explanation": {
+            "name": "Explanation"
+          }
+        }
+      },
+      "feeding_status": {
+        "name": "Feeding status",
+        "state": {
+          "ok": "OK",
+          "soon": "Soon",
+          "due": "Due",
+          "overdue": "Overdue"
+        }
+      }
+    }
   }
 }

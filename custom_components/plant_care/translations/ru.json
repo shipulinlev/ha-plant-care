@@ -138,5 +138,52 @@
         "outdoor": "На улице"
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "next_watering": {
+        "name": "Следующий полив"
+      },
+      "next_feeding": {
+        "name": "Следующая подкормка"
+      },
+      "last_watered": {
+        "name": "Последний полив"
+      },
+      "last_fed": {
+        "name": "Последняя подкормка"
+      },
+      "watering_status": {
+        "name": "Статус полива",
+        "state": {
+          "ok": "В порядке",
+          "soon": "Скоро",
+          "due": "Пора",
+          "overdue": "Просрочено"
+        },
+        "state_attributes": {
+          "climate_status": {
+            "name": "Климат",
+            "state": {
+              "ok": "В норме",
+              "out_of_range": "Вне нормы",
+              "unknown": "Неизвестно"
+            }
+          },
+          "explanation": {
+            "name": "Пояснение"
+          }
+        }
+      },
+      "feeding_status": {
+        "name": "Статус подкормки",
+        "state": {
+          "ok": "В порядке",
+          "soon": "Скоро",
+          "due": "Пора",
+          "overdue": "Просрочено"
+        }
+      }
+    }
   }
 }
