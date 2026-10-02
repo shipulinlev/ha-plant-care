@@ -3,8 +3,8 @@
 Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and mypy green) · `[-]` dropped.
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
-**Current phase:** 3. Integration: flows and devices
-**Next step:** phase 3, en/ru translations for all flows
+**Current phase:** 4. Climate and coordinator
+**Next step:** phase 4, `ClimateResolver` for indoor plants (area sensors)
 
 ---
 
@@ -80,7 +80,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - The entry has an update listener that reloads it, so added, edited and removed plants apply at once. Consequence: both reconfigure flows use `async_update_and_abort` (a subentry's `async_update_reload_and_abort` raises with an update listener).
   - HA deletes a removed subentry's device itself; setup prunes CareLog history of plants that no longer exist (also covers deletions while HA was down).
   - `runtime.py`: `PlantCareRuntimeData` (care log for now), `PlantCareConfigEntry`.
-- [ ] en/ru translations for all flows
+- [x] en/ru translations for all flows
+  - Strings were written with each flow; this task added `tests/test_translations.py` as a guard: `en.json` equals `strings.json`, `ru.json` has exactly the same keys and placeholders, and every form field of every flow step (driven through the real flows) has a label. Each check was mutation-tested.
 
 ## Phase 4. Climate and coordinator
 - [ ] `ClimateResolver`: area sensors (entity area or its device's area), median, ignore unavailable

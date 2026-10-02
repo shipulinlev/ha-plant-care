@@ -4,6 +4,9 @@
 - `tests/core/`: engine unit tests, no HA, fast, run on Windows too. `tests/core/conftest.py` overrides the HA autouse fixture with a no-op: any new HA-dependent autouse fixture in `tests/conftest.py` needs a no-op override there as well.
 - `tests/test_*.py`: integration tests on `pytest-homeassistant-custom-component` (dev container only): the `hass` fixture, `MockConfigEntry` (with `subentries_data` for plants), `aioclient_mock` for OpenPlantbook, never real network.
 
+## Translations
+`tests/test_translations.py` fails when `translations/en.json` drifts from `strings.json`, when `ru.json` misses or adds a key or changes a placeholder, or when a flow step shows a field without a label. After editing `strings.json`, copy it to `translations/en.json` and add the Russian text.
+
 ## Coverage the integration must keep
 Hub flow and plant flow including every error, area change → climate sources re-resolved, every action, entry unload with no leaked listeners.
 
