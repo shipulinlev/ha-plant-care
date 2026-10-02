@@ -72,7 +72,7 @@ actions:
 
 ## Development
 
-Architecture, coding rules and commands are in [CLAUDE.md](CLAUDE.md); the roadmap and progress are in [PLAN.md](PLAN.md).
+Contributor rules are in [CLAUDE.md](CLAUDE.md), architecture in [docs/architecture/](docs/architecture/), the dev environment in [docs/development.md](docs/development.md); the roadmap and progress are in [PLAN.md](PLAN.md).
 
 Development happens in the dev container (VS Code → *Reopen in Container*), because Home Assistant does not run natively on Windows.
 
