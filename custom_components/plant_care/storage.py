@@ -58,6 +58,10 @@ class CareLog:
             for plant_id, rows in data["plants"].items()
         }
 
+    def plant_ids(self) -> set[str]:
+        """Plants that have history."""
+        return set(self._events)
+
     def events(self, plant_id: str) -> tuple[CareEvent, ...]:
         """All events of a plant, oldest first."""
         return tuple(self._events.get(plant_id, ()))

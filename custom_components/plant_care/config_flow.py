@@ -80,7 +80,8 @@ class PlantCareConfigFlow(ConfigFlow, domain=DOMAIN):
             if not errors:
                 # Full replace, not data_updates: a cleared weather entity must
                 # disappear from the data, and the form holds every hub key.
-                return self.async_update_reload_and_abort(entry, data=user_input)
+                # The entry's update listener reloads it.
+                return self.async_update_and_abort(entry, data=user_input)
 
         return self._show_hub_form(
             "reconfigure", user_input or dict(entry.data), errors

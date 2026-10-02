@@ -17,7 +17,9 @@ Modules: `config_flow.py` (hub), `plant_flow.py` (plants), `flow_helpers.py`, `c
 - Saving an edit replaces the whole subentry data, so cleared optional fields disappear.
 
 ## Device and room
-- Each plant has exactly one device, bound to its subentry (`config_subentry_id`). All plant entities belong to it.
+- Each plant has exactly one device, bound to its subentry (`config_subentry_id`), with `identifiers={(DOMAIN, subentry_id)}` and the plant's name. All plant entities belong to it. `devices.py` creates or renames the devices on every setup.
+- The hub entry has an update listener that reloads it, so adding, editing or deleting a plant applies immediately (devices, history pruning, later the coordinator).
+- Deleting a plant: HA removes the subentry's device itself; setup prunes CareLog history of plants that no longer exist.
 - **The room is the device's area.** The area lives only in the device registry; subentry data never holds it as lasting state.
 - Moving a plant: the user changes the device area in the HA UI, or calls `plant_care.move`, which does the same. The integration listens to `EVENT_DEVICE_REGISTRY_UPDATED` and re-resolves climate sources on area change.
 - **Area handoff:** HA creates the `subentry_id` only after a subentry flow finishes, so the add flow cannot write the device area itself. It stores the chosen area as a one-time `area_id` key in the subentry data; device creation applies it to the new device and removes the key. Only device creation reads `area_id`; the edit flow carries a still-pending `area_id` over unchanged.

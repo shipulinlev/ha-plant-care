@@ -12,11 +12,14 @@ Applies to all code under `custom_components/plant_care/` except `core/`.
 
 ## Flows
 - Form errors are translation keys in `errors`; entered values are kept on error via `add_suggested_values_to_schema`.
-- Reconfigure saves with `async_update_reload_and_abort(..., data=...)` (full replace) when cleared optional fields must disappear; `data_updates` merges and cannot remove keys.
+- The hub entry has an update listener that reloads it, so reconfigure steps save with `async_update_and_abort(..., data=...)`. A subentry's `async_update_reload_and_abort` raises `ValueError` when an update listener exists (the hub variant logs, breaking in 2026.12).
+- Pass the full `data` (replace) when cleared optional fields must disappear; `data_updates` merges and cannot remove keys.
 
 ## Verified APIs (for the pinned HA 2026.9)
 - Subentries: `ConfigFlow.async_get_supported_subentry_types()` → `{"plant": PlantSubentryFlow}`; in a subentry `reconfigure` use `self._get_entry()` and `self._get_reconfigure_subentry()`. A subentry flow never learns the `subentry_id` it creates.
 - Since HA 2026.8 a device has exactly one config entry (hence minimum 2026.8.0 in `hacs.json`): read `device.config_entry_id` / `device.config_subentry_id` (`device.config_entries_subentries` is deprecated); move a device with `async_update_device(new_config_entry_id=..., new_config_subentry_id=...)`.
+- Device lookup: `device_registry.async_get_device` is deprecated (identifiers are unique only within a config entry); use `async_get_device_by_identifier(identifier, config_entry_id)`.
+- Removing a subentry makes HA clear its devices and entities (`async_clear_config_subentry`); adding or updating one fires the entry's update listeners but reloads nothing by itself.
 - Schemas use `voluptuous` (`import voluptuous as vol`). The developer docs already show `probatio`, but HA 2026.9 types its flow API with `vol.Schema` and no core flow uses `probatio`; switch only after bumping the HA pin to a version that accepts it.
 - Single instance: `"single_config_entry": true` in `manifest.json`, no check in the flow.
 

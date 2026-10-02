@@ -168,7 +168,8 @@ class PlantSubentryFlow(ConfigSubentryFlow):
                     data[CONF_SPECIES_PID] = subentry.data[CONF_SPECIES_PID]
                 if CONF_AREA_ID in subentry.data:
                     data[CONF_AREA_ID] = subentry.data[CONF_AREA_ID]
-                return self.async_update_reload_and_abort(
+                # The hub's update listener reloads the entry.
+                return self.async_update_and_abort(
                     entry, subentry, title=self._name, data=data
                 )
 

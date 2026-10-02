@@ -123,3 +123,13 @@ async def test_remove_unknown_plant_is_a_no_op(hass: HomeAssistant) -> None:
     await log.async_remove_plant("missing")
 
     assert log.events("missing") == ()
+
+
+async def test_plant_ids_lists_plants_with_history(hass: HomeAssistant) -> None:
+    """Plants with at least one event are listed, removed ones are not."""
+    log = await _loaded(hass)
+    await log.async_add(_event("plant_a", CareKind.WATERED, T0))
+    await log.async_add(_event("plant_b", CareKind.FED, T0))
+    await log.async_remove_plant("plant_b")
+
+    assert log.plant_ids() == {"plant_a"}

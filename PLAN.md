@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 3. Integration: flows and devices
-**Next step:** phase 3, device per subentry with area
+**Next step:** phase 3, en/ru translations for all flows
 
 ---
 
@@ -75,7 +75,11 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - Same two steps as adding: `reconfigure` (name prefilled, optional new search) → `reconfigure_details` (prefilled; no area, since the plant moves with its device; plus species range overrides `min/max_temp`, `min/max_env_humid`, `min/max_soil_moist`). A minimum above its maximum is `invalid_range`.
   - Species: no new search keeps it; after a search the dropdown decides, and leaving it empty removes the species. A pending `area_id` handoff is carried over. Saves with `async_update_reload_and_abort` (full replace, so cleared fields disappear).
   - `PlantSubentryFlow` moved to `plant_flow.py`; flow helpers shared with the hub flow live in `flow_helpers.py`.
-- [ ] Device per subentry with area; deleting a subentry removes the device and history
+- [x] Device per subentry with area; deleting a subentry removes the device and history
+  - `devices.py`: on setup, one device per plant (`identifiers={(DOMAIN, subentry_id)}`, bound to the subentry, named after it); a pending `area_id` is applied if the area exists and always removed from the data.
+  - The entry has an update listener that reloads it, so added, edited and removed plants apply at once. Consequence: both reconfigure flows use `async_update_and_abort` (a subentry's `async_update_reload_and_abort` raises with an update listener).
+  - HA deletes a removed subentry's device itself; setup prunes CareLog history of plants that no longer exist (also covers deletions while HA was down).
+  - `runtime.py`: `PlantCareRuntimeData` (care log for now), `PlantCareConfigEntry`.
 - [ ] en/ru translations for all flows
 
 ## Phase 4. Climate and coordinator
