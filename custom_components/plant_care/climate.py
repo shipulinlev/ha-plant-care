@@ -1,6 +1,7 @@
 """Climate sources of a plant (not the HA `climate` platform).
 
-Indoor plants read the temperature and humidity sensors of their area.
+Indoor plants read the temperature and humidity sensors of their area;
+outdoor plants read a weather entity (rain comes from `rain.py`).
 """
 
 from dataclasses import dataclass
@@ -8,8 +9,18 @@ import math
 from statistics import median
 
 from homeassistant.components.sensor import SensorDeviceClass
-from homeassistant.const import ATTR_UNIT_OF_MEASUREMENT, UnitOfTemperature
-from homeassistant.core import HomeAssistant, State, callback
+from homeassistant.components.weather.const import (
+    ATTR_WEATHER_HUMIDITY,
+    ATTR_WEATHER_TEMPERATURE,
+    ATTR_WEATHER_TEMPERATURE_UNIT,
+)
+from homeassistant.const import (
+    ATTR_UNIT_OF_MEASUREMENT,
+    STATE_UNAVAILABLE,
+    STATE_UNKNOWN,
+    UnitOfTemperature,
+)
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.util.unit_conversion import TemperatureConverter
@@ -88,28 +99,60 @@ def read_indoor(
     )
 
 
+@callback
+def read_outdoor(
+    hass: HomeAssistant, weather_entity: str | None, soil_moisture_entity: str | None
+) -> ClimateReading:
+    """Current conditions from a weather entity, temperature in °C."""
+    soil = _number(hass, soil_moisture_entity) if soil_moisture_entity else None
+    state = hass.states.get(weather_entity) if weather_entity else None
+    if state is None or state.state in (STATE_UNAVAILABLE, STATE_UNKNOWN):
+        return ClimateReading(soil_moisture=soil)
+    temperature = _finite(state.attributes.get(ATTR_WEATHER_TEMPERATURE))
+    if temperature is not None:
+        temperature = _to_celsius(
+            temperature,
+            state.attributes.get(
+                ATTR_WEATHER_TEMPERATURE_UNIT, hass.config.units.temperature_unit
+            ),
+        )
+    return ClimateReading(
+        temperature=temperature,
+        humidity=_finite(state.attributes.get(ATTR_WEATHER_HUMIDITY)),
+        soil_moisture=soil,
+    )
+
+
 def _number(hass: HomeAssistant, entity_id: str) -> float | None:
     """The numeric state; None when missing, unavailable, unknown or not a number."""
-    return _value(hass.states.get(entity_id))
+    state = hass.states.get(entity_id)
+    return _finite(state.state) if state is not None else None
 
 
 def _celsius(hass: HomeAssistant, entity_id: str) -> float | None:
     state = hass.states.get(entity_id)
-    value = _value(state)
+    value = _finite(state.state) if state is not None else None
     if state is None or value is None:
         return None
-    unit = state.attributes.get(ATTR_UNIT_OF_MEASUREMENT, UnitOfTemperature.CELSIUS)
+    return _to_celsius(
+        value,
+        state.attributes.get(ATTR_UNIT_OF_MEASUREMENT, UnitOfTemperature.CELSIUS),
+    )
+
+
+def _to_celsius(value: float, unit: str) -> float | None:
     try:
         return TemperatureConverter.convert(value, unit, UnitOfTemperature.CELSIUS)
     except HomeAssistantError:
         return None
 
 
-def _value(state: State | None) -> float | None:
-    if state is None:
+def _finite(raw: object) -> float | None:
+    """A finite float, or None for anything else (unavailable, text, nan)."""
+    if isinstance(raw, bool) or not isinstance(raw, str | int | float):
         return None
     try:
-        value = float(state.state)
+        value = float(raw)
     except ValueError:
         return None
     return value if math.isfinite(value) else None

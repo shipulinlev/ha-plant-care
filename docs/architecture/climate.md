@@ -8,7 +8,9 @@
 - No area, or no usable sensor, gives `None` values.
 
 ## Outdoor
-- A `weather` entity: the plant's override, else the hub default. Current temperature and humidity from its attributes; precipitation from the forecast via the `weather.get_forecasts` action (`return_response`), aggregated per day before it reaches the engine.
+- A `weather` entity: the plant's override, else the hub default.
+- `read_outdoor(hass, weather_entity, soil_moisture_entity)` → `ClimateReading`: temperature (converted to °C) and humidity from the entity's attributes; an unavailable or missing entity gives `None` values.
+- Rain (`rain.py`, `RainTracker`): `weather.get_forecasts` (daily, else hourly summed per local day), in mm, one call per entity per hour (`RAIN_FORECAST_TTL`). Weather entities only forecast, so a passed day keeps its last forecast as its rain (`RAIN_HISTORY_DAYS` = 14). Errors are logged and known days kept. `precipitation(entity_id)` gives one `Precipitation` per day at the start of the local day, as the engine expects. Kept in memory only.
 
 ## Both
 - The plant's **soil moisture sensor**, when set, is read wherever it is and takes priority in the engine.

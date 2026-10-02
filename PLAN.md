@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 4. Climate and coordinator
-**Next step:** phase 4, outdoor climate (weather entity + `weather.get_forecasts`)
+**Next step:** phase 4, react to device area changes
 
 ---
 
@@ -87,7 +87,10 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 - [x] `ClimateResolver`: area sensors (entity area or its device's area), median, ignore unavailable
   - Plain functions in `climate.py` for now: `async_indoor_sources(hass, area_id)` → `IndoorSources` (sorted temperature/humidity entity ids, `entity_ids` for subscriptions) and `read_indoor(hass, sources, soil_entity)` → `ClimateReading`. A class only if the outdoor forecast cache needs one.
   - Device class: the user's override wins over the original; disabled entities are skipped. Temperatures are converted to °C (species ranges are in °C); unknown units and non-finite values are skipped.
-- [ ] `ClimateResolver`: weather + `weather.get_forecasts` for outdoor
+- [x] `ClimateResolver`: weather + `weather.get_forecasts` for outdoor
+  - `climate.read_outdoor(hass, weather_entity, soil_entity)`: temperature (to °C) and humidity from the weather entity's attributes.
+  - `rain.py` `RainTracker`: daily forecast (hourly fallback, summed per local day), converted to mm, fetched at most once per hour per entity. Weather entities only forecast, so a day keeps its last forecast once it has passed (14 days kept): that approximates past rain. Fetch errors are logged; known days are kept.
+  - In memory only: after a restart past rain is unknown until it is forecast again (Backlog).
 - [ ] React to device area changes (`EVENT_DEVICE_REGISTRY_UPDATED`) → rebuild subscriptions
 - [ ] `DataUpdateCoordinator`: timer + state events + CareLog events
 - [ ] Clean entry unload (all listeners removed)
@@ -109,6 +112,7 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 - [ ] First release v0.1.0 (HACS custom repository)
 
 ## Backlog / ideas (after v0.1)
+- Persist `RainTracker` days in a `Store`, so past rain survives an HA restart (today it is lost and an outdoor plant may show "needs water" right after rain)
 - "Garden" Lovelace card via websocket API
 - `calendar` entity with the care schedule
 - Light levels (`min/max_light_lux`) and placement recommendations
