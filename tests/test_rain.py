@@ -192,7 +192,9 @@ async def test_failed_fetch_keeps_known_rain(
     failure: Exception,
 ) -> None:
     """A failing forecast keeps the cached days and raises nothing."""
-    forecasts["daily"] = [{"datetime": _local(_day(1)), "precipitation": 5.0}]
+    # Captured before the tick, which may cross local midnight.
+    tomorrow = _day(1)
+    forecasts["daily"] = [{"datetime": _local(tomorrow), "precipitation": 5.0}]
     tracker = RainTracker(hass)
     await tracker.async_refresh(WEATHER)
 
@@ -201,7 +203,7 @@ async def test_failed_fetch_keeps_known_rain(
     forecasts["hourly"] = failure
     await tracker.async_refresh(WEATHER)
 
-    assert tracker.precipitation(WEATHER) == (_rain(_day(1), 5.0),)
+    assert tracker.precipitation(WEATHER) == (_rain(tomorrow, 5.0),)
 
 
 async def test_missing_weather_action_is_tolerated(hass: HomeAssistant) -> None:
