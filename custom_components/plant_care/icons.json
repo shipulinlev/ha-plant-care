@@ -14,6 +14,14 @@
         }
       }
     },
+    "button": {
+      "water": {
+        "default": "mdi:watering-can"
+      },
+      "feed": {
+        "default": "mdi:sprout"
+      }
+    },
     "sensor": {
       "next_watering": {
         "default": "mdi:watering-can"

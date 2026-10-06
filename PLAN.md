@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 5. Entities and actions
-**Next step:** phase 5, `button` (water, feed)
+**Next step:** phase 5, actions `water`, `feed`, `move`, `refresh_species`
 
 ---
 
@@ -106,7 +106,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - Description-driven (`value_fn` / `attributes_fn`); added per plant with `config_subentry_id`. `watering_status` carries `climate_status` and `explanation` (unrecorded: it changes every update). en/ru names, enum states, attribute labels; `icons.json` with state icons.
 - [x] `binary_sensor`: needs_water, needs_feeding
   - On while the matching status is `due` or `overdue` (`soon` stays off); unknown while nothing is scheduled. No device class; states translated Yes/No (en) and Да/Нет (ru), `on` state icons.
-- [ ] `button`: water, feed
+- [x] `button`: water, feed
+  - A press logs the care at `utcnow()` through `coordinator.async_log_care`. The Ficus test hub moved to `tests/conftest.py` as `plant_entry`.
 - [ ] Actions `water`, `feed`, `move`, `refresh_species` + `services.yaml` + translations
 - [ ] Diagnostics (`diagnostics.py`) without secrets
 

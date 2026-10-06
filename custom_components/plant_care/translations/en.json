@@ -156,6 +156,14 @@
         }
       }
     },
+    "button": {
+      "water": {
+        "name": "Water"
+      },
+      "feed": {
+        "name": "Feed"
+      }
+    },
     "sensor": {
       "next_watering": {
         "name": "Next watering"

@@ -156,6 +156,14 @@
         }
       }
     },
+    "button": {
+      "water": {
+        "name": "Полить"
+      },
+      "feed": {
+        "name": "Подкормить"
+      }
+    },
     "sensor": {
       "next_watering": {
         "name": "Следующий полив"
