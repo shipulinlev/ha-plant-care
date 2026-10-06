@@ -1,0 +1,29 @@
+water:
+  fields:
+    device_id: &plant
+      required: true
+      selector:
+        device:
+          integration: plant_care
+    when: &when
+      required: false
+      example: "2026-10-01 08:00:00"
+      selector:
+        datetime:
+
+feed:
+  fields:
+    device_id: *plant
+    when: *when
+
+move:
+  fields:
+    device_id: *plant
+    area_id:
+      required: true
+      selector:
+        area:
+
+refresh_species:
+  fields:
+    device_id: *plant

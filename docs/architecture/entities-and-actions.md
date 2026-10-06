@@ -18,11 +18,12 @@ All entities derive from `PlantCareEntity`: `has_entity_name = True`, `translati
 - Icons live in `icons.json` (per translation key, with state icons for the statuses).
 
 ## Actions
-- `plant_care.water`, `plant_care.feed`: target the plant device, optional `when` for backdating.
-- `plant_care.move`: device + `area_id`; same effect as changing the device area in the UI.
-- `plant_care.refresh_species`: drop the cached profile so it is fetched again.
-- Registered in `async_setup`, not in `async_setup_entry`.
-- Errors: `ServiceValidationError` with a `translation_key`.
+Every action takes one required `device_id` (a device selector filtered to `plant_care`), the way core integrations target a device; there is no `target`, so one call acts on one plant.
+- `plant_care.water`, `plant_care.feed`: optional `when` for backdating; a time without a zone is local time, a future time is rejected. Same write path as the buttons (`coordinator.async_log_care`).
+- `plant_care.move`: device + `area_id`; same effect as changing the device area in the UI (the coordinator follows the registry event).
+- `plant_care.refresh_species`: drop the cached profile and the fetch-retry pause, then refresh, so the profile is fetched at once.
+- Registered in `async_setup`, not in `async_setup_entry` (`services.py`).
+- Errors: `ServiceValidationError` with a `translation_key` from the `exceptions` section of `strings.json`: `plant_not_found`, `hub_not_loaded`, `when_in_future`, `area_not_found`, `no_species`.
 
 ## README examples
 Automation examples use the plant entities' `entity_id`s, never `device_id` (HA best practice).

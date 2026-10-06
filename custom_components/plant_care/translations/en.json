@@ -209,5 +209,76 @@
         }
       }
     }
+  },
+  "exceptions": {
+    "plant_not_found": {
+      "message": "Device {device_id} is not a Plant Care plant."
+    },
+    "hub_not_loaded": {
+      "message": "Plant Care is not loaded."
+    },
+    "when_in_future": {
+      "message": "Care cannot be logged in the future."
+    },
+    "area_not_found": {
+      "message": "Area {area_id} does not exist."
+    },
+    "no_species": {
+      "message": "{plant} has no species to refresh."
+    }
+  },
+  "services": {
+    "water": {
+      "name": "Water",
+      "description": "Logs a watering of the plant.",
+      "fields": {
+        "device_id": {
+          "name": "Plant",
+          "description": "The plant device."
+        },
+        "when": {
+          "name": "When",
+          "description": "When it happened; now if left empty. A time without a time zone is local time."
+        }
+      }
+    },
+    "feed": {
+      "name": "Feed",
+      "description": "Logs a feeding of the plant.",
+      "fields": {
+        "device_id": {
+          "name": "Plant",
+          "description": "The plant device."
+        },
+        "when": {
+          "name": "When",
+          "description": "When it happened; now if left empty. A time without a time zone is local time."
+        }
+      }
+    },
+    "move": {
+      "name": "Move",
+      "description": "Moves the plant to another area (room); its climate sources follow.",
+      "fields": {
+        "device_id": {
+          "name": "Plant",
+          "description": "The plant device."
+        },
+        "area_id": {
+          "name": "Area",
+          "description": "The area to move the plant to."
+        }
+      }
+    },
+    "refresh_species": {
+      "name": "Refresh species",
+      "description": "Fetches the plant's species profile from OpenPlantbook again.",
+      "fields": {
+        "device_id": {
+          "name": "Plant",
+          "description": "The plant device."
+        }
+      }
+    }
   }
 }

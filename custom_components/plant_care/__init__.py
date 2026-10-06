@@ -10,6 +10,7 @@ from .coordinator import PlantCareCoordinator
 from .devices import async_sync_plant_devices
 from .flow_helpers import client_from_config
 from .runtime import PlantCareConfigEntry, PlantCareRuntimeData
+from .services import async_setup_services
 from .storage import CareLog, ProfileCache
 
 # Configured through the UI only; YAML config for the domain is rejected.
@@ -19,7 +20,8 @@ PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.S
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the Plant Care integration."""
+    """Set up the Plant Care integration: its actions live as long as HA."""
+    async_setup_services(hass)
     return True
 
 

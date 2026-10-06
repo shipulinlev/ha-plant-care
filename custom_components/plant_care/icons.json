@@ -51,5 +51,19 @@
         "default": "mdi:leaf"
       }
     }
+  },
+  "services": {
+    "water": {
+      "service": "mdi:watering-can"
+    },
+    "feed": {
+      "service": "mdi:sprout"
+    },
+    "move": {
+      "service": "mdi:home-export-outline"
+    },
+    "refresh_species": {
+      "service": "mdi:refresh"
+    }
   }
 }

@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 5. Entities and actions
-**Next step:** phase 5, actions `water`, `feed`, `move`, `refresh_species`
+**Next step:** phase 5, diagnostics (`diagnostics.py`)
 
 ---
 
@@ -108,7 +108,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - On while the matching status is `due` or `overdue` (`soon` stays off); unknown while nothing is scheduled. No device class; states translated Yes/No (en) and Да/Нет (ru), `on` state icons.
 - [x] `button`: water, feed
   - A press logs the care at `utcnow()` through `coordinator.async_log_care`. The Ficus test hub moved to `tests/conftest.py` as `plant_entry`.
-- [ ] Actions `water`, `feed`, `move`, `refresh_species` + `services.yaml` + translations
+- [x] Actions `water`, `feed`, `move`, `refresh_species` + `services.yaml` + translations
+  - One required `device_id` per call (device selector filtered to `plant_care`, as core integrations do), not a `target`. Each call checks the device is a plant of the loaded hub (`plant_not_found`, `hub_not_loaded`). `when` without a zone is local time; future times are `when_in_future`. `refresh_species` goes through `coordinator.async_refresh_species`, which also clears the fetch-retry pause.
 - [ ] Diagnostics (`diagnostics.py`) without secrets
 
 ## Phase 6. Live HA check and release

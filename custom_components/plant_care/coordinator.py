@@ -79,6 +79,12 @@ class PlantCareCoordinator(DataUpdateCoordinator[dict[str, CarePlan]]):
         await self.care_log.async_add(event)
         await self.async_refresh()
 
+    async def async_refresh_species(self, pid: str) -> None:
+        """Fetch a species profile again now, even after a recent failure."""
+        await self.profile_cache.async_remove(pid)
+        self._profile_failed_at.pop(pid, None)
+        await self.async_refresh()
+
     @callback
     def async_listen_registries(self) -> None:
         """Recompute when a plant or a sensor moves; stops on entry unload."""
