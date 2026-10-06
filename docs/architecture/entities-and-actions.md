@@ -1,6 +1,6 @@
 # Plant entities and actions
 
-Modules: `entity.py` (`PlantCareEntity`: `device_info`, `unique_id`), `sensor.py`, `binary_sensor.py`, `button.py`, `services.py`, `services.yaml`.
+Modules: `entity.py` (`PlantCareEntity`: `device_info`, `unique_id`), `sensor.py`, `binary_sensor.py`, `button.py`, `services.py`, `services.yaml`, `diagnostics.py`.
 
 ## Entities
 | Platform | Entity | Purpose |
@@ -24,6 +24,9 @@ Every action takes one required `device_id` (a device selector filtered to `plan
 - `plant_care.refresh_species`: drop the cached profile and the fetch-retry pause, then refresh, so the profile is fetched at once.
 - Registered in `async_setup`, not in `async_setup_entry` (`services.py`).
 - Errors: `ServiceValidationError` with a `translation_key` from the `exceptions` section of `strings.json`: `plant_not_found`, `hub_not_loaded`, `when_in_future`, `area_not_found`, `no_species`.
+
+## Diagnostics
+`diagnostics.py` gives config entry diagnostics: the hub data with `client_id` and `client_secret` redacted, and per plant (by `subentry_id`) its title, area, subentry data, care log and current plan, plus the cached profile of every species in use.
 
 ## README examples
 Automation examples use the plant entities' `entity_id`s, never `device_id` (HA best practice).

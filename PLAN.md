@@ -3,8 +3,8 @@
 Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and mypy green) · `[-]` dropped.
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
-**Current phase:** 5. Entities and actions
-**Next step:** phase 5, diagnostics (`diagnostics.py`)
+**Current phase:** 6. Live HA check and release
+**Next step:** phase 6, manual run on a test HA
 
 ---
 
@@ -110,7 +110,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - A press logs the care at `utcnow()` through `coordinator.async_log_care`. The Ficus test hub moved to `tests/conftest.py` as `plant_entry`.
 - [x] Actions `water`, `feed`, `move`, `refresh_species` + `services.yaml` + translations
   - One required `device_id` per call (device selector filtered to `plant_care`, as core integrations do), not a `target`. Each call checks the device is a plant of the loaded hub (`plant_not_found`, `hub_not_loaded`). `when` without a zone is local time; future times are `when_in_future`. `refresh_species` goes through `coordinator.async_refresh_species`, which also clears the fetch-retry pause.
-- [ ] Diagnostics (`diagnostics.py`) without secrets
+- [x] Diagnostics (`diagnostics.py`) without secrets
+  - Config entry diagnostics: hub data with `client_id`/`client_secret` redacted; per plant its title, area, subentry data, care log and plan; cached profiles of the species in use. `species_entry` test fixture moved to `tests/conftest.py`.
 
 ## Phase 6. Live HA check and release
 - [ ] Manual run on a test HA: add 2 indoor + 1 outdoor plant, move one, log a watering

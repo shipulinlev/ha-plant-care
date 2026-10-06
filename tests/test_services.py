@@ -6,7 +6,6 @@ from typing import Any
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.config_entries import ConfigSubentryData
-from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_NAME
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import area_registry as ar, device_registry as dr
@@ -18,10 +17,6 @@ from pytest_homeassistant_custom_component.test_util.aiohttp import (
 )
 
 from custom_components.plant_care.const import (
-    CONF_FEEDING_INTERVAL,
-    CONF_LOCATION_TYPE,
-    CONF_SPECIES_PID,
-    CONF_WATERING_INTERVAL,
     DOMAIN,
     SUBENTRY_TYPE_PLANT,
 )
@@ -181,36 +176,6 @@ def _mock_openplantbook(aioclient_mock: AiohttpClientMocker, min_temp: float) ->
         f"{BASE_URL}/token/", json={"access_token": "t", "expires_in": 3600}
     )
     aioclient_mock.get(f"{BASE_URL}/plant/detail/ficus/", json={"min_temp": min_temp})
-
-
-@pytest.fixture
-async def species_entry(
-    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
-) -> MockConfigEntry:
-    """A loaded hub whose one plant has a species, fetched from OpenPlantbook."""
-    _mock_openplantbook(aioclient_mock, min_temp=10)
-    entry = MockConfigEntry(
-        domain=DOMAIN,
-        data={CONF_CLIENT_ID: "id", CONF_CLIENT_SECRET: "secret"},
-        subentries_data=[
-            ConfigSubentryData(
-                data={
-                    CONF_NAME: "Ficus",
-                    CONF_SPECIES_PID: "ficus",
-                    CONF_LOCATION_TYPE: "indoor",
-                    CONF_WATERING_INTERVAL: 7,
-                    CONF_FEEDING_INTERVAL: 30,
-                },
-                subentry_type=SUBENTRY_TYPE_PLANT,
-                title="Ficus",
-                unique_id=None,
-            )
-        ],
-    )
-    entry.add_to_hass(hass)
-    assert await hass.config_entries.async_setup(entry.entry_id)
-    await hass.async_block_till_done()
-    return entry
 
 
 def _cached_min_temp(entry: MockConfigEntry) -> float | None:
