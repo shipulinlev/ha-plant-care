@@ -29,4 +29,4 @@ Every action takes one required `device_id` (a device selector filtered to `plan
 `diagnostics.py` gives config entry diagnostics: the hub data with `client_id` and `client_secret` redacted, and per plant (by `subentry_id`) its title, area, subentry data, care log and current plan, plus the cached profile of every species in use.
 
 ## README examples
-Automation examples use the plant entities' `entity_id`s, never `device_id` (HA best practice).
+Automation examples use the plant entities' `entity_id`s, never `device_id` (HA best practice). To log care now, examples press the plant's `button` (`button.press`) rather than calling `plant_care.water`, which needs a `device_id`. `tests/test_readme.py` loads every YAML block of the README's "Automation examples" section as an automation, so keep only automations there.

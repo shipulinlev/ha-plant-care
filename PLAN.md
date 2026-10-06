@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 6. Live HA check and release
-**Next step:** phase 6, manual run on a test HA
+**Next step:** phase 6, manual run on a test HA (then calibration, license, brand assets, release)
 
 ---
 
@@ -115,7 +115,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 
 ## Phase 6. Live HA check and release
 - [ ] Manual run on a test HA: add 2 indoor + 1 outdoor plant, move one, log a watering
-- [ ] Automation examples ("time to water" notification) in README
+- [x] Automation examples ("time to water" notification) in README
+  - Four examples: notify per plant (`mode: parallel`), morning summary via a binary sensor group helper, actionable notification and NFC tag that press the plant's `water` button (entity-based, since the actions take `device_id`). `tests/test_readme.py` loads every example as an automation.
 - [ ] Calibrate factors against real data
 - [ ] Choose a license
 - [ ] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
