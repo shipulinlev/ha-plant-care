@@ -1,5 +1,19 @@
 {
   "entity": {
+    "binary_sensor": {
+      "needs_water": {
+        "default": "mdi:water-check",
+        "state": {
+          "on": "mdi:water-alert"
+        }
+      },
+      "needs_feeding": {
+        "default": "mdi:sprout",
+        "state": {
+          "on": "mdi:sprout-outline"
+        }
+      }
+    },
     "sensor": {
       "next_watering": {
         "default": "mdi:watering-can"

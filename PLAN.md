@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 5. Entities and actions
-**Next step:** phase 5, `binary_sensor` (needs_water, needs_feeding)
+**Next step:** phase 5, `button` (water, feed)
 
 ---
 
@@ -104,7 +104,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - `PlantCareEntity` (`CoordinatorEntity`): `has_entity_name`, `translation_key` = key, `unique_id` = `{subentry_id}_{key}`, device by identifier; `plan` property; unavailable without a plan. Built and tested together with the sensors.
 - [x] `sensor`: next/last watering/feeding, statuses
   - Description-driven (`value_fn` / `attributes_fn`); added per plant with `config_subentry_id`. `watering_status` carries `climate_status` and `explanation` (unrecorded: it changes every update). en/ru names, enum states, attribute labels; `icons.json` with state icons.
-- [ ] `binary_sensor`: needs_water, needs_feeding
+- [x] `binary_sensor`: needs_water, needs_feeding
+  - On while the matching status is `due` or `overdue` (`soon` stays off); unknown while nothing is scheduled. No device class; states translated Yes/No (en) and Да/Нет (ru), `on` state icons.
 - [ ] `button`: water, feed
 - [ ] Actions `water`, `feed`, `move`, `refresh_species` + `services.yaml` + translations
 - [ ] Diagnostics (`diagnostics.py`) without secrets

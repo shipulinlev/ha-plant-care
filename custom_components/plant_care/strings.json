@@ -140,6 +140,22 @@
     }
   },
   "entity": {
+    "binary_sensor": {
+      "needs_water": {
+        "name": "Needs water",
+        "state": {
+          "on": "Yes",
+          "off": "No"
+        }
+      },
+      "needs_feeding": {
+        "name": "Needs feeding",
+        "state": {
+          "on": "Yes",
+          "off": "No"
+        }
+      }
+    },
     "sensor": {
       "next_watering": {
         "name": "Next watering"

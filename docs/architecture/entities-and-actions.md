@@ -14,6 +14,7 @@ Modules: `entity.py` (`PlantCareEntity`: `device_info`, `unique_id`), `sensor.py
 All entities derive from `PlantCareEntity`: `has_entity_name = True`, `translation_key` = key, `unique_id = f"{subentry_id}_{key}"`, attached to the plant's device, unavailable while the coordinator has no plan for the plant. Platforms add each plant's entities with `async_add_entities(..., config_subentry_id=subentry_id)`, so HA removes them with the plant.
 
 - `watering_status` attributes: `climate_status` (`ok` | `out_of_range` | `unknown`) and `explanation` (excluded from the recorder via `_unrecorded_attributes`).
+- `needs_water`, `needs_feeding`: on while the watering/feeding status is `due` or `overdue`, off for `ok` and `soon`, unknown while nothing is scheduled (no care logged yet).
 - Icons live in `icons.json` (per translation key, with state icons for the statuses).
 
 ## Actions
