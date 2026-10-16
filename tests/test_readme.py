@@ -21,7 +21,7 @@ YAML_BLOCK = re.compile(r"```yaml\n(.*?)```", re.S)
 
 def _examples() -> list[dict[str, Any]]:
     text = README.read_text("utf-8")
-    section = text.split("## Automation examples", 1)[1].split("\n## ", 1)[0]
+    section = text.split("Automation examples\n", 1)[1].split("\n## ", 1)[0]
     examples: list[dict[str, Any]] = []
     for block in YAML_BLOCK.findall(section):
         example = parse_yaml(block)
