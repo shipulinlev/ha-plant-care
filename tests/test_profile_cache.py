@@ -5,6 +5,7 @@ from typing import Any
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.core import HomeAssistant
+from homeassistant.util import dt as dt_util
 
 from custom_components.plant_care.core.models import SpeciesProfile
 from custom_components.plant_care.storage import (
@@ -73,7 +74,7 @@ async def test_profiles_survive_reload(
 ) -> None:
     """Profiles and their fetch time are persisted."""
     cache = await _loaded(hass)
-    partial = SpeciesProfile(min_temp=5)
+    partial = SpeciesProfile(display_pid="Monstera deliciosa", min_temp=5)
     await cache.async_set(PID, partial)
 
     assert (
@@ -105,3 +106,31 @@ async def test_remove_unknown_profile_is_a_no_op(hass: HomeAssistant) -> None:
     await cache.async_remove("missing")
 
     assert cache.get("missing") is None
+
+
+async def test_version_1_profiles_are_kept_but_refetched(
+    hass: HomeAssistant, hass_storage: dict[str, Any]
+) -> None:
+    """Profiles cached before names were stored get their name on the next fetch.
+
+    Until then the old ranges are still served, so an offline upgrade loses
+    nothing.
+    """
+    hass_storage[PROFILE_CACHE_STORAGE_KEY] = {
+        "version": 1,
+        "minor_version": 1,
+        "key": PROFILE_CACHE_STORAGE_KEY,
+        "data": {
+            "profiles": {
+                PID: {
+                    "fetched_at": dt_util.utcnow().isoformat(),
+                    "profile": {"min_temp": 12.0, "max_temp": 32.0},
+                }
+            }
+        },
+    }
+
+    cache = await _loaded(hass)
+
+    assert cache.get(PID) == SpeciesProfile(min_temp=12, max_temp=32)
+    assert cache.needs_refresh(PID)

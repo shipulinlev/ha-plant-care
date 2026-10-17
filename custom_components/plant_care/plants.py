@@ -39,7 +39,8 @@ def with_overrides(
     profile: SpeciesProfile | None, data: Mapping[str, Any]
 ) -> SpeciesProfile | None:
     """The species profile with the plant's range overrides on top."""
-    overrides = {
+    # Typed loosely: the keys are range fields only, never `display_pid`.
+    overrides: dict[str, Any] = {
         key: float(data[key])
         for pair in RANGE_OVERRIDES
         for key in pair

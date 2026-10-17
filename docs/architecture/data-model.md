@@ -18,6 +18,7 @@ Modules: `config_flow.py` (hub), `plant_flow.py` (plants), `flow_helpers.py`, `c
 
 ## Device and room
 - Each plant has exactly one device, bound to its subentry (`config_subentry_id`), with `identifiers={(DOMAIN, subentry_id)}` and the plant's name. All plant entities belong to it. `devices.py` creates or renames the devices on every setup.
+- **Device `model` = species name**: OpenPlantbook's readable `display_pid` from the profile cache, the `species_pid` while no name is cached (never fetched, or OpenPlantbook down), `None` for a plant without a species. Set on every setup and again after every coordinator refresh, since a refresh may fetch a profile. Only `species_pid` is stored in the subentry; the profile cache is the single home of the name.
 - The hub entry has an update listener that reloads it, so adding, editing or deleting a plant applies immediately (devices, history pruning, later the coordinator).
 - Deleting a plant: HA removes the subentry's device itself; setup prunes CareLog history of plants that no longer exist.
 - **The room is the device's area.** The area lives only in the device registry; subentry data never holds it as lasting state.

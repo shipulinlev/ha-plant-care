@@ -123,6 +123,7 @@ async def test_get_profile_parses_ranges(
     profile = await client.async_get_profile(PID)
 
     assert profile == SpeciesProfile(
+        display_pid="Abelia chinensis",
         min_temp=8,
         max_temp=35,
         min_env_humid=30,

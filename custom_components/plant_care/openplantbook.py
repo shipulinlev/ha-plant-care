@@ -1,6 +1,6 @@
 """Async client for the OpenPlantbook API (species search and ranges)."""
 
-from dataclasses import dataclass, fields
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import Any, Final
@@ -19,7 +19,14 @@ _TOKEN_RENEW_MARGIN: Final = timedelta(minutes=5)
 _CREDENTIALS_REJECTED: Final = frozenset(
     {HTTPStatus.BAD_REQUEST, HTTPStatus.UNAUTHORIZED, HTTPStatus.FORBIDDEN}
 )
-_PROFILE_FIELDS: Final = tuple(field.name for field in fields(SpeciesProfile))
+_RANGE_FIELDS: Final = (
+    "min_temp",
+    "max_temp",
+    "min_env_humid",
+    "max_env_humid",
+    "min_soil_moist",
+    "max_soil_moist",
+)
 
 
 class OpenPlantbookError(Exception):
@@ -90,10 +97,11 @@ class OpenPlantbookClient:
         ]
 
     async def async_get_profile(self, pid: str) -> SpeciesProfile:
-        """Environment ranges of a species; unknown ranges are None."""
+        """Name and environment ranges of a species; unknown values are None."""
         body = await self._api_get(f"{BASE_URL}/plant/detail/{quote(pid, safe='')}/")
         return SpeciesProfile(
-            **{name: _number(body.get(name)) for name in _PROFILE_FIELDS}
+            display_pid=_text(body.get("display_pid")),
+            **{name: _number(body.get(name)) for name in _RANGE_FIELDS},
         )
 
     async def _api_get(
@@ -134,6 +142,10 @@ class OpenPlantbookClient:
                 return response.status, await response.json()
         except (ClientError, TimeoutError, ValueError) as err:
             raise OpenPlantbookError(f"Request to {url} failed: {err!r}") from err
+
+
+def _text(value: object) -> str | None:
+    return value if isinstance(value, str) and value else None
 
 
 def _number(value: object) -> float | None:

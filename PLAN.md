@@ -124,6 +124,13 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 - [ ] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
 - [ ] First release v0.1.0 (HACS custom repository)
 
+## Phase 7. Data for the Lovelace cards (`shipulinlev/ha-plants-care-card`)
+Additive only: existing entities, unique IDs and automations stay as they are; the cards hide missing fields.
+- [x] Species name as the plant device's `model` (OpenPlantbook `display_pid`; `None` without a species)
+  - The name lives in the profile cache (`SpeciesProfile.display_pid`), not the subentry. Profile cache storage v2: v1 profiles are kept but marked stale, so existing plants get their name on the next refresh. The model falls back to `species_pid` while no name is cached; it is set at setup and after every coordinator refresh (`async_update_species_models`).
+- [ ] `interval_days` attribute on `next_watering` (after the climate multiplier) and `next_feeding` (after the season factor)
+- [ ] `entity_picture` on `next_watering` from the OpenPlantbook profile's `image_url`
+
 ## Backlog / ideas (after v0.1)
 - Persist `RainTracker` days in a `Store`, so past rain survives an HA restart (today it is lost and an outdoor plant may show "needs water" right after rain)
 - "Garden" Lovelace card via websocket API
@@ -156,3 +163,4 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-10-01 | Plant flow: search, then pick species | Maintainer's choice; no need to look up PIDs by hand, and a plant can still be added when OpenPlantbook is down |
 | 2026-10-01 | Area passed as a one-time `area_id` in subentry data, removed once applied to the device | HA generates the `subentry_id` after the flow finishes, so the flow cannot write the device area itself; the device registry stays the only lasting home of the area |
 | 2026-10-01 | Flow schemas use `voluptuous`, not `probatio` | Current developer docs show `probatio`, but HA 2026.9.4 (our pin) types `FlowHandler` with `vol.Schema` and no core flow uses `probatio` yet; revisit when the pin is bumped |
+| 2026-10-17 | Species display name kept in the profile cache, not in subentry data | One source for everything OpenPlantbook says about a species; existing plants get the name without a migration of their subentries, and `refresh_species` updates it |

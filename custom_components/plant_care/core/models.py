@@ -53,8 +53,12 @@ class PlantConfig:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class SpeciesProfile:
-    """Acceptable environment ranges of a species; any bound may be unknown."""
+    """A species' readable name and acceptable environment ranges.
 
+    Any value may be unknown. The engine reads only the ranges.
+    """
+
+    display_pid: str | None = None
     min_temp: float | None = None
     max_temp: float | None = None
     min_env_humid: float | None = None

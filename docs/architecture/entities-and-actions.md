@@ -2,6 +2,9 @@
 
 Modules: `entity.py` (`PlantCareEntity`: `device_info`, `unique_id`), `sensor.py`, `binary_sensor.py`, `button.py`, `services.py`, `services.yaml`, `diagnostics.py`.
 
+## Device
+The plant's device carries the species name as `model` (see `data-model.md`, "Device and room"); the Lovelace cards read it from `hass.devices[device_id].model`.
+
 ## Entities
 | Platform | Entity | Purpose |
 |---|---|---|

@@ -1,13 +1,13 @@
 """The Plant Care integration."""
 
 from homeassistant.const import Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import DOMAIN
 from .coordinator import PlantCareCoordinator
-from .devices import async_sync_plant_devices
+from .devices import async_sync_plant_devices, async_update_species_models
 from .flow_helpers import client_from_config
 from .runtime import PlantCareConfigEntry, PlantCareRuntimeData
 from .services import async_setup_services
@@ -34,7 +34,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: PlantCareConfigEntry) ->
     profile_cache = ProfileCache(hass)
     await profile_cache.async_load()
 
-    async_sync_plant_devices(hass, entry)
+    async_sync_plant_devices(hass, entry, profile_cache)
 
     coordinator = PlantCareCoordinator(
         hass,
@@ -45,6 +45,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: PlantCareConfigEntry) ->
     )
     await coordinator.async_config_entry_first_refresh()
     coordinator.async_listen_registries()
+
+    # A refresh may fetch a species profile, and with it the readable name.
+    @callback
+    def _update_models() -> None:
+        async_update_species_models(hass, entry, profile_cache)
+
+    _update_models()
+    entry.async_on_unload(coordinator.async_add_listener(_update_models))
     entry.runtime_data = PlantCareRuntimeData(
         care_log=care_log, coordinator=coordinator
     )

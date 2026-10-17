@@ -2,7 +2,7 @@
 
 from dataclasses import asdict
 from datetime import UTC, datetime, timedelta
-from typing import Final, TypedDict
+from typing import Any, Final, TypedDict
 
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.storage import Store
@@ -15,7 +15,8 @@ CARE_LOG_STORAGE_KEY: Final = f"{DOMAIN}.care_log"
 CARE_LOG_STORAGE_VERSION: Final = 1
 
 PROFILE_CACHE_STORAGE_KEY: Final = f"{DOMAIN}.species_profiles"
-PROFILE_CACHE_STORAGE_VERSION: Final = 1
+# Version 2 added the species' display name.
+PROFILE_CACHE_STORAGE_VERSION: Final = 2
 # Species ranges hardly ever change; this only bounds how stale they get.
 PROFILE_CACHE_TTL: Final = timedelta(days=30)
 
@@ -97,18 +98,35 @@ class CareLog:
 
 class _StoredProfile(TypedDict):
     fetched_at: str
-    profile: dict[str, float | None]
+    profile: dict[str, Any]
 
 
 class _ProfileCacheData(TypedDict):
     profiles: dict[str, _StoredProfile]
 
 
+class _ProfileStore(Store[_ProfileCacheData]):
+    async def _async_migrate_func(
+        self,
+        old_major_version: int,
+        old_minor_version: int,
+        old_data: dict[str, Any],
+    ) -> _ProfileCacheData:
+        """Version 1 profiles have no name: keep them, but due for a refetch."""
+        stale = datetime.min.replace(tzinfo=UTC).isoformat()
+        return {
+            "profiles": {
+                pid: {"fetched_at": stale, "profile": row["profile"]}
+                for pid, row in old_data["profiles"].items()
+            }
+        }
+
+
 class ProfileCache:
     """OpenPlantbook profiles keyed by species PID, served even when expired."""
 
     def __init__(self, hass: HomeAssistant) -> None:
-        self._store: Store[_ProfileCacheData] = Store(
+        self._store = _ProfileStore(
             hass, PROFILE_CACHE_STORAGE_VERSION, PROFILE_CACHE_STORAGE_KEY
         )
         self._profiles: dict[str, tuple[datetime, SpeciesProfile]] = {}
