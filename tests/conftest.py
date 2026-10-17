@@ -19,6 +19,8 @@ from custom_components.plant_care.const import (
 )
 from custom_components.plant_care.openplantbook import BASE_URL
 
+FICUS_IMAGE = "https://opb-img.plantbook.io/ficus.jpg"
+
 
 @pytest.fixture(autouse=True)
 def auto_enable_custom_integrations(enable_custom_integrations: None) -> None:
@@ -55,11 +57,17 @@ async def plant_entry(hass: HomeAssistant) -> MockConfigEntry:
 async def species_entry(
     hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
 ) -> MockConfigEntry:
-    """Like `plant_entry`, with species `ficus` (min_temp 10) from OpenPlantbook."""
+    """Like `plant_entry`, with species `ficus` from OpenPlantbook.
+
+    The profile has `min_temp` 10, the name "Ficus" and `FICUS_IMAGE`.
+    """
     aioclient_mock.post(
         f"{BASE_URL}/token/", json={"access_token": "t", "expires_in": 3600}
     )
-    aioclient_mock.get(f"{BASE_URL}/plant/detail/ficus/", json={"min_temp": 10})
+    aioclient_mock.get(
+        f"{BASE_URL}/plant/detail/ficus/",
+        json={"display_pid": "Ficus", "min_temp": 10, "image_url": FICUS_IMAGE},
+    )
     entry = MockConfigEntry(
         domain=DOMAIN,
         data={CONF_CLIENT_ID: "id", CONF_CLIENT_SECRET: "secret"},

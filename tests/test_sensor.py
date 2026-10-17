@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.sensor import ATTR_OPTIONS, SensorDeviceClass
-from homeassistant.const import ATTR_DEVICE_CLASS, STATE_UNKNOWN
+from homeassistant.const import ATTR_DEVICE_CLASS, ATTR_ENTITY_PICTURE, STATE_UNKNOWN
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 from homeassistant.util import dt as dt_util
@@ -13,6 +13,8 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.plant_care.const import DOMAIN
 from custom_components.plant_care.core.models import CareEvent, CareKind
 from custom_components.plant_care.sensor import ATTR_INTERVAL_DAYS
+
+from .conftest import FICUS_IMAGE
 
 KEYS = (
     "next_watering",
@@ -153,3 +155,23 @@ async def test_interval_days_is_left_out_without_a_plan(
         state = hass.states.get(f"sensor.ficus_{key}")
         assert state is not None
         assert ATTR_INTERVAL_DAYS not in state.attributes
+
+
+async def test_next_watering_shows_the_species_photo(
+    hass: HomeAssistant, species_entry: MockConfigEntry
+) -> None:
+    """The OpenPlantbook image is the picture of the next watering sensor only."""
+    state = hass.states.get("sensor.ficus_next_watering")
+    assert state is not None
+    assert state.attributes[ATTR_ENTITY_PICTURE] == FICUS_IMAGE
+    feeding = hass.states.get("sensor.ficus_next_feeding")
+    assert feeding is not None
+    assert ATTR_ENTITY_PICTURE not in feeding.attributes
+
+
+async def test_no_photo_without_species(
+    hass: HomeAssistant, plant_entry: MockConfigEntry
+) -> None:
+    state = hass.states.get("sensor.ficus_next_watering")
+    assert state is not None
+    assert ATTR_ENTITY_PICTURE not in state.attributes

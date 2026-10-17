@@ -62,6 +62,7 @@ DETAIL_RESPONSE = {
     "min_soil_moist": 15,
     "max_soil_ec": 2000,
     "min_soil_ec": 350,
+    "image_url": "https://opb-img.plantbook.io/abelia%20chinensis.jpg",
 }
 
 
@@ -124,6 +125,7 @@ async def test_get_profile_parses_ranges(
 
     assert profile == SpeciesProfile(
         display_pid="Abelia chinensis",
+        image_url="https://opb-img.plantbook.io/abelia%20chinensis.jpg",
         min_temp=8,
         max_temp=35,
         min_env_humid=30,

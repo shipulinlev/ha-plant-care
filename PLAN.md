@@ -4,7 +4,7 @@ Statuses: `[ ]` not started · `[~]` in progress · `[x]` done (tests, ruff and 
 Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues carry the reference: `(#N)`.
 
 **Current phase:** 6. Live HA check and release
-**Next step:** phase 6, manual run on a test HA (then calibration, license, brand assets, release)
+**Next step:** phase 6, manual run on a test HA (phase 7 is done; check the cards against a live HA there)
 
 ---
 
@@ -130,7 +130,8 @@ Additive only: existing entities, unique IDs and automations stay as they are; t
   - The name lives in the profile cache (`SpeciesProfile.display_pid`), not the subentry. Profile cache storage v2: v1 profiles are kept but marked stale, so existing plants get their name on the next refresh. The model falls back to `species_pid` while no name is cached; it is set at setup and after every coordinator refresh (`async_update_species_models`).
 - [x] `interval_days` attribute on `next_watering` (after the climate multiplier) and `next_feeding` (after the season factor)
   - `CarePlan.watering_interval` / `feeding_interval`. The engine always knows both (initial interval before history, season factor before the first feeding), so the attribute is present whenever there is a plan; rounded to 2 decimals so tiny climate changes don't add recorder rows. Diagnostics show them as HA's extended-JSON `timedelta` (`total_seconds`).
-- [ ] `entity_picture` on `next_watering` from the OpenPlantbook profile's `image_url`
+- [x] `entity_picture` on `next_watering` from the OpenPlantbook profile's `image_url`
+  - The detail endpoint returns `image_url` (OpenPlantbook API 1.02, checked in the `slaxor505/openplantbook-client` docs). Stored as `SpeciesProfile.image_url` in the same cache v2 as the name. The sensor reads the cached profile without range overrides; diagnostics include the URL (public, not sensitive).
 
 ## Backlog / ideas (after v0.1)
 - Persist `RainTracker` days in a `Store`, so past rain survives an HA restart (today it is lost and an outdoor plant may show "needs water" right after rain)

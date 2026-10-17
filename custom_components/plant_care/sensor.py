@@ -34,6 +34,8 @@ class PlantSensorDescription(SensorEntityDescription):
 
     value_fn: Callable[[CarePlan], datetime | str | None]
     attributes_fn: Callable[[CarePlan], Mapping[str, Any]] | None = None
+    # Shows the species photo, so a card can find it on a known entity.
+    species_picture: bool = False
 
 
 def _status(status: CareStatus | None) -> str | None:
@@ -53,6 +55,7 @@ SENSORS: tuple[PlantSensorDescription, ...] = (
         device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=lambda plan: plan.next_watering,
         attributes_fn=lambda plan: _interval(plan.watering_interval),
+        species_picture=True,
     ),
     PlantSensorDescription(
         key="next_feeding",
@@ -134,3 +137,11 @@ class PlantSensor(PlantCareEntity, SensorEntity):
         plan = self.plan
         attributes_fn = self.entity_description.attributes_fn
         return attributes_fn(plan) if plan and attributes_fn else None
+
+    @property
+    def entity_picture(self) -> str | None:
+        """The species photo from the cached OpenPlantbook profile."""
+        if not self.entity_description.species_picture:
+            return None
+        profile = self.coordinator.species_profile(self._plant_id)
+        return profile.image_url if profile else None

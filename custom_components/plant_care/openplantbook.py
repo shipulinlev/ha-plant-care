@@ -97,10 +97,11 @@ class OpenPlantbookClient:
         ]
 
     async def async_get_profile(self, pid: str) -> SpeciesProfile:
-        """Name and environment ranges of a species; unknown values are None."""
+        """Name, photo and environment ranges of a species; unknown values are None."""
         body = await self._api_get(f"{BASE_URL}/plant/detail/{quote(pid, safe='')}/")
         return SpeciesProfile(
             display_pid=_text(body.get("display_pid")),
+            image_url=_text(body.get("image_url")),
             **{name: _number(body.get(name)) for name in _RANGE_FIELDS},
         )
 

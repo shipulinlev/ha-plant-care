@@ -15,7 +15,7 @@ CARE_LOG_STORAGE_KEY: Final = f"{DOMAIN}.care_log"
 CARE_LOG_STORAGE_VERSION: Final = 1
 
 PROFILE_CACHE_STORAGE_KEY: Final = f"{DOMAIN}.species_profiles"
-# Version 2 added the species' display name.
+# Version 2 added the species' display name and image URL.
 PROFILE_CACHE_STORAGE_VERSION: Final = 2
 # Species ranges hardly ever change; this only bounds how stale they get.
 PROFILE_CACHE_TTL: Final = timedelta(days=30)
@@ -112,7 +112,7 @@ class _ProfileStore(Store[_ProfileCacheData]):
         old_minor_version: int,
         old_data: dict[str, Any],
     ) -> _ProfileCacheData:
-        """Version 1 profiles have no name: keep them, but due for a refetch."""
+        """Version 1 profiles have no name or photo: keep them, but refetch."""
         stale = datetime.min.replace(tzinfo=UTC).isoformat()
         return {
             "profiles": {

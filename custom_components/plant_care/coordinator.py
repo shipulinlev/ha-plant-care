@@ -98,6 +98,12 @@ class PlantCareCoordinator(DataUpdateCoordinator[dict[str, CarePlan]]):
                 )
             )
 
+    def species_profile(self, plant_id: str) -> SpeciesProfile | None:
+        """The cached profile of a plant's species, without range overrides."""
+        subentry = self.config_entry.subentries.get(plant_id)
+        pid = subentry.data.get(CONF_SPECIES_PID) if subentry else None
+        return self.profile_cache.get(pid) if pid else None
+
     async def async_shutdown(self) -> None:
         """Stop the state subscriptions along with the timer."""
         self._untrack()
