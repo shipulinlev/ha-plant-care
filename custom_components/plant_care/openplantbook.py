@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import Any, Final
-from urllib.parse import quote
+from urllib.parse import quote, urlsplit
 
 from aiohttp import ClientError, ClientSession, ClientTimeout
 from homeassistant.util import dt as dt_util
@@ -101,7 +101,7 @@ class OpenPlantbookClient:
         body = await self._api_get(f"{BASE_URL}/plant/detail/{quote(pid, safe='')}/")
         return SpeciesProfile(
             display_pid=_text(body.get("display_pid")),
-            image_url=_text(body.get("image_url")),
+            image_url=_web_url(body.get("image_url")),
             **{name: _number(body.get(name)) for name in _RANGE_FIELDS},
         )
 
@@ -147,6 +147,15 @@ class OpenPlantbookClient:
 
 def _text(value: object) -> str | None:
     return value if isinstance(value, str) and value else None
+
+
+def _web_url(value: object) -> str | None:
+    """An absolute http(s) URL, else None: it ends up as an entity picture."""
+    url = _text(value)
+    if url is None:
+        return None
+    parts = urlsplit(url)
+    return url if parts.scheme in ("http", "https") and parts.netloc else None
 
 
 def _number(value: object) -> float | None:

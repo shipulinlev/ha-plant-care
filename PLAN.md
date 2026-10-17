@@ -131,7 +131,7 @@ Additive only: existing entities, unique IDs and automations stay as they are; t
 - [x] `interval_days` attribute on `next_watering` (after the climate multiplier) and `next_feeding` (after the season factor)
   - `CarePlan.watering_interval` / `feeding_interval`. The engine always knows both (initial interval before history, season factor before the first feeding), so the attribute is present whenever there is a plan; rounded to 2 decimals so tiny climate changes don't add recorder rows. Diagnostics show them as HA's extended-JSON `timedelta` (`total_seconds`).
 - [x] `entity_picture` on `next_watering` from the OpenPlantbook profile's `image_url`
-  - The detail endpoint returns `image_url` (OpenPlantbook API 1.02, checked in the `slaxor505/openplantbook-client` docs). Stored as `SpeciesProfile.image_url` in the same cache v2 as the name. The sensor reads the cached profile without range overrides; diagnostics include the URL (public, not sensitive).
+  - The detail endpoint returns `image_url` (OpenPlantbook API 1.02, checked in the `slaxor505/openplantbook-client` docs). Stored as `SpeciesProfile.image_url` in the same cache v2 as the name. The sensor reads the cached profile without range overrides; diagnostics include the URL (public, not sensitive). The client keeps only absolute http(s) URLs (security review: no `javascript:`/`data:` pictures).
 
 ## Backlog / ideas (after v0.1)
 - Persist `RainTracker` days in a `Store`, so past rain survives an HA restart (today it is lost and an outdoor plant may show "needs water" right after rain)

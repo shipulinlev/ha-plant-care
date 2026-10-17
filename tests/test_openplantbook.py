@@ -135,6 +135,22 @@ async def test_get_profile_parses_ranges(
     )
 
 
+@pytest.mark.parametrize(
+    "image_url",
+    ["javascript:alert(1)", "data:image/png;base64,AAAA", "/local/ficus.jpg", 42],
+)
+async def test_get_profile_drops_image_that_is_not_a_web_url(
+    client: OpenPlantbookClient, aioclient_mock: AiohttpClientMocker, image_url: Any
+) -> None:
+    """Only an absolute http(s) URL may become an entity picture."""
+    aioclient_mock.post(TOKEN_URL, json=TOKEN)
+    aioclient_mock.get(DETAIL_URL, json={**DETAIL_RESPONSE, "image_url": image_url})
+
+    profile = await client.async_get_profile(PID)
+
+    assert profile.image_url is None
+
+
 async def test_get_profile_with_missing_ranges(
     client: OpenPlantbookClient, aioclient_mock: AiohttpClientMocker
 ) -> None:

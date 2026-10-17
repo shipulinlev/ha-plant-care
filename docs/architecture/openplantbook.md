@@ -7,7 +7,7 @@ Modules: `openplantbook.py` (`OpenPlantbookClient`), `storage.py` (`ProfileCache
 ## API client
 - Endpoints (checked against the official SDK `slaxor505/openplantbook-sdk-py`): `POST /api/v1/token/` (form data, OAuth2 client credentials), `GET /plant/search?alias=`, `GET /plant/detail/{pid}/`.
 - Session from `async_get_clientsession`. The token is kept in memory, renewed 5 min before expiry and once more on HTTP 401.
-- Methods: `async_authenticate` (credential check for the hub flow), `async_search` → `SpeciesMatch`, `async_get_profile` → `SpeciesProfile` (the six ranges plus the readable `display_pid` and the photo `image_url`, each `None` when missing).
+- Methods: `async_authenticate` (credential check for the hub flow), `async_search` → `SpeciesMatch`, `async_get_profile` → `SpeciesProfile` (the six ranges plus the readable `display_pid` and the photo `image_url`, each `None` when missing; `image_url` must be an absolute http(s) URL, since it becomes an `entity_picture`).
 - Errors: `OpenPlantbookAuthError` (token 400/401/403, API 403, repeated 401), `OpenPlantbookRateLimitError` (429), otherwise `OpenPlantbookError` (network, timeout, other HTTP, bad JSON). The client never logs; callers decide.
 - Detail also has `min/max_light_lux` and `min/max_soil_ec`; they are not mapped until the engine uses them.
 
