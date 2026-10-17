@@ -128,7 +128,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 Additive only: existing entities, unique IDs and automations stay as they are; the cards hide missing fields.
 - [x] Species name as the plant device's `model` (OpenPlantbook `display_pid`; `None` without a species)
   - The name lives in the profile cache (`SpeciesProfile.display_pid`), not the subentry. Profile cache storage v2: v1 profiles are kept but marked stale, so existing plants get their name on the next refresh. The model falls back to `species_pid` while no name is cached; it is set at setup and after every coordinator refresh (`async_update_species_models`).
-- [ ] `interval_days` attribute on `next_watering` (after the climate multiplier) and `next_feeding` (after the season factor)
+- [x] `interval_days` attribute on `next_watering` (after the climate multiplier) and `next_feeding` (after the season factor)
+  - `CarePlan.watering_interval` / `feeding_interval`. The engine always knows both (initial interval before history, season factor before the first feeding), so the attribute is present whenever there is a plan; rounded to 2 decimals so tiny climate changes don't add recorder rows. Diagnostics show them as HA's extended-JSON `timedelta` (`total_seconds`).
 - [ ] `entity_picture` on `next_watering` from the OpenPlantbook profile's `image_url`
 
 ## Backlog / ideas (after v0.1)

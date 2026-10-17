@@ -16,6 +16,7 @@ The plant's device carries the species name as `model` (see `data-model.md`, "De
 
 All entities derive from `PlantCareEntity`: `has_entity_name = True`, `translation_key` = key, `unique_id = f"{subentry_id}_{key}"`, attached to the plant's device, unavailable while the coordinator has no plan for the plant. Platforms add each plant's entities with `async_add_entities(..., config_subentry_id=subentry_id)`, so HA removes them with the plant.
 
+- `next_watering`, `next_feeding` attribute: `interval_days` (float, 2 decimals): the plan's `watering_interval` / `feeding_interval` in days, left out when unknown (the entity is unavailable without a plan). Recorded: it changes only with the interval (history, climate multiplier, season).
 - `watering_status` attributes: `climate_status` (`ok` | `out_of_range` | `unknown`) and `explanation` (excluded from the recorder via `_unrecorded_attributes`).
 - `needs_water`, `needs_feeding`: on while the watering/feeding status is `due` or `overdue`, off for `ok` and `soon`, unknown while nothing is scheduled (no care logged yet).
 - Icons live in `icons.json` (per translation key, with state icons for the statuses).

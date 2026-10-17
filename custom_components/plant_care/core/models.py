@@ -1,7 +1,7 @@
 """Data models shared by the engine and the integration."""
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import StrEnum
 
 
@@ -102,12 +102,18 @@ class ClimateReading:
 
 @dataclass(frozen=True, slots=True, kw_only=True)
 class CarePlan:
-    """Engine output for one plant."""
+    """Engine output for one plant.
+
+    The intervals are the ones behind the next dates: watering after the
+    climate multiplier, feeding after the season factor.
+    """
 
     last_watered: datetime | None
     last_fed: datetime | None
     next_watering: datetime | None
     next_feeding: datetime | None
+    watering_interval: timedelta | None
+    feeding_interval: timedelta | None
     watering_status: CareStatus | None
     feeding_status: CareStatus | None
     climate_status: ClimateStatus

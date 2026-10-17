@@ -1,9 +1,9 @@
-"""Sensors of a plant: next and last care dates, care statuses."""
+"""Sensors of a plant: next and last care dates, intervals, care statuses."""
 
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
-from datetime import datetime
-from typing import Any
+from datetime import datetime, timedelta
+from typing import Any, Final
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -24,6 +24,9 @@ PARALLEL_UPDATES = 0
 
 _STATUS_OPTIONS = [status.value for status in CareStatus]
 
+# Days between care events behind the next date, for the Lovelace cards.
+ATTR_INTERVAL_DAYS: Final = "interval_days"
+
 
 @dataclass(frozen=True, kw_only=True)
 class PlantSensorDescription(SensorEntityDescription):
@@ -37,16 +40,25 @@ def _status(status: CareStatus | None) -> str | None:
     return status.value if status is not None else None
 
 
+def _interval(interval: timedelta | None) -> dict[str, float]:
+    """The interval in days, left out while unknown."""
+    if interval is None:
+        return {}
+    return {ATTR_INTERVAL_DAYS: round(interval / timedelta(days=1), 2)}
+
+
 SENSORS: tuple[PlantSensorDescription, ...] = (
     PlantSensorDescription(
         key="next_watering",
         device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=lambda plan: plan.next_watering,
+        attributes_fn=lambda plan: _interval(plan.watering_interval),
     ),
     PlantSensorDescription(
         key="next_feeding",
         device_class=SensorDeviceClass.TIMESTAMP,
         value_fn=lambda plan: plan.next_feeding,
+        attributes_fn=lambda plan: _interval(plan.feeding_interval),
     ),
     PlantSensorDescription(
         key="watering_status",

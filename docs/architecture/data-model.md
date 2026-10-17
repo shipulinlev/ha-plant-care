@@ -7,6 +7,7 @@ Modules: `config_flow.py` (hub), `plant_flow.py` (plants), `flow_helpers.py`, `c
 - **Hub** = the config entry, exactly one per installation (`"single_config_entry": true` in the manifest). Data: `client_id`, `client_secret` (OpenPlantbook), optional `weather_entity` (default for outdoor plants). Created by the `user` step, edited by `reconfigure` (credentials are re-checked, entry reloaded).
 - **Plant** = config subentry of type `plant`. Added by `user` → `details`, edited by `reconfigure` → `reconfigure_details`, deleted the standard HA way.
 - Plant subentry data: `name`, `species_pid` (optional), `location_type` (`indoor` | `outdoor`), `soil_moisture_entity` (optional), `weather_entity` (optional per-plant override of the hub default), `initial_watering_interval_days`, `feeding_interval_days`, optional species range overrides (`RANGE_OVERRIDES` in `const.py`, named like the `SpeciesProfile` fields they replace).
+- The settings feed the engine's `CarePlan`, which also reports the effective intervals behind the next dates: `watering_interval` (initial or learned interval × climate multiplier) and `feeding_interval` (`feeding_interval_days` × season factor); see `engine.md`.
 - Inside the integration a plant is identified by its `subentry_id` (also the CareLog `plant_id`), never by name or `entity_id`.
 - Deleting a plant deletes its device and its care history.
 

@@ -12,7 +12,7 @@ Modules: `models.py` (frozen dataclasses: `PlantConfig`, `SpeciesProfile`, `Care
 - **Feeding** = user interval × seasonal factor (meteorological seasons, hemisphere from HA latitude; spring/summer ×1, autumn ×1.5, winter ×2).
 - **Statuses**: `soon` within 1 d before the date, `due` from the date, `overdue` from 1 d after.
 - No logged watering or feeding and no rain or soil reading to anchor on → `next_*` and `*_status` are `None`.
-- **Output** (`CarePlan`): `next_watering`, `next_feeding`, `watering_status` / `feeding_status` (`ok` | `soon` | `due` | `overdue`), `climate_status` (`ok` | `out_of_range` | `unknown`), `last_watered`, `last_fed`, `explanation` (short English technical text, exposed as an attribute, never translated).
+- **Output** (`CarePlan`): `next_watering`, `next_feeding`, `watering_interval` (base interval × climate multiplier, before rain and soil adjustments; known even before the first watering), `feeding_interval` (user interval × season factor, known even before the first feeding), `watering_status` / `feeding_status` (`ok` | `soon` | `due` | `overdue`), `climate_status` (`ok` | `out_of_range` | `unknown`), `last_watered`, `last_fed`, `explanation` (short English technical text, exposed as an attribute, never translated).
 - Missing climate data is not an error: base interval with `climate_status = unknown`.
 
 ## Tests

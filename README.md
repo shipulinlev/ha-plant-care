@@ -66,8 +66,8 @@ That's it: your plant shows up as a device with its own sensors and buttons. �
 
 | Entity | Description |
 |---|---|
-| 💧 `sensor.<plant>_next_watering` | when the next watering is due |
-| 🧪 `sensor.<plant>_next_feeding` | when the next feeding is due |
+| 💧 `sensor.<plant>_next_watering` | when the next watering is due; `interval_days` attribute |
+| 🧪 `sensor.<plant>_next_feeding` | when the next feeding is due; `interval_days` attribute |
 | 🚦 `sensor.<plant>_watering_status` / `_feeding_status` | `ok`, `soon`, `due`, `overdue` |
 | 🕒 `sensor.<plant>_last_watered` / `_last_fed` | last care event |
 | 🔔 `binary_sensor.<plant>_needs_water` / `_needs_feeding` | `on` while watering or feeding is due or overdue |

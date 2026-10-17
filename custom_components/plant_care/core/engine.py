@@ -38,6 +38,7 @@ class EngineSettings:
 @dataclass(frozen=True, slots=True)
 class _Watering:
     next_at: datetime | None
+    interval: timedelta
     status: CareStatus | None
     climate_status: ClimateStatus
 
@@ -66,13 +67,18 @@ class CareEngine:
         watering = self._watering(
             plant, watered, climate=climate, profile=profile, now=now, notes=notes
         )
-        next_feeding = self._next_feeding(plant, fed, now, latitude, notes)
+        feeding_interval = self._feeding_interval(plant, now, latitude, notes)
+        next_feeding = fed[-1] + feeding_interval if fed else None
+        if not fed:
+            notes.append("feeding: none logged")
 
         return CarePlan(
             last_watered=watered[-1] if watered else None,
             last_fed=fed[-1] if fed else None,
             next_watering=watering.next_at,
             next_feeding=next_feeding,
+            watering_interval=watering.interval,
+            feeding_interval=feeding_interval,
             watering_status=watering.status,
             feeding_status=self._status(next_feeding, now),
             climate_status=watering.climate_status,
@@ -115,6 +121,7 @@ class CareEngine:
             climate,
             profile,
             next_at=next_at,
+            interval=interval,
             climate_status=climate_status,
             now=now,
             notes=notes,
@@ -146,6 +153,7 @@ class CareEngine:
         profile: SpeciesProfile | None,
         *,
         next_at: datetime | None,
+        interval: timedelta,
         climate_status: ClimateStatus,
         now: datetime,
         notes: list[str],
@@ -161,27 +169,19 @@ class CareEngine:
             notes.append(f"soil wet ({moisture:g} > {high:g})")
             recheck = now + self._s.wet_soil_recheck
             next_at = recheck if next_at is None else max(next_at, recheck)
-            return _Watering(next_at, CareStatus.OK, climate_status)
-        return _Watering(next_at, self._status(next_at, now), climate_status)
+            return _Watering(next_at, interval, CareStatus.OK, climate_status)
+        status = self._status(next_at, now)
+        return _Watering(next_at, interval, status, climate_status)
 
-    def _next_feeding(
-        self,
-        plant: PlantConfig,
-        fed: list[datetime],
-        now: datetime,
-        latitude: float,
-        notes: list[str],
-    ) -> datetime | None:
-        if not fed:
-            notes.append("feeding: none logged")
-            return None
+    def _feeding_interval(
+        self, plant: PlantConfig, now: datetime, latitude: float, notes: list[str]
+    ) -> timedelta:
         season = season_at(now, latitude)
-        interval = timedelta(days=plant.feeding_interval_days) * season.feeding_factor
         notes.append(
             f"feeding: {plant.feeding_interval_days:g} d"
             f" x{season.feeding_factor:g} ({season})"
         )
-        return fed[-1] + interval
+        return timedelta(days=plant.feeding_interval_days) * season.feeding_factor
 
     def _status(self, next_at: datetime | None, now: datetime) -> CareStatus | None:
         if next_at is None:

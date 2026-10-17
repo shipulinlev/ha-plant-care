@@ -253,3 +253,24 @@ def test_feeding_seasonal_factor(latitude: float, next_in_days: float) -> None:
 
 def test_feeding_due() -> None:
     assert _plan([_fed(14)]).feeding_status is CareStatus.DUE
+
+
+# --- intervals ---------------------------------------------------------------
+
+
+def test_watering_interval_is_initial_until_history_exists() -> None:
+    assert _plan().watering_interval == 7 * DAY
+    assert _plan([_watered(2)]).watering_interval == 7 * DAY
+
+
+def test_watering_interval_from_history_with_climate() -> None:
+    # Median 4 d, 33 degrees x0.80 -> 3.2 d.
+    events = [_watered(d) for d in (13, 9, 6, 2)]
+    plan = _plan(events, climate=ClimateReading(temperature=33))
+    assert plan.watering_interval == 4 * DAY * 0.8
+
+
+def test_feeding_interval_includes_season_factor() -> None:
+    winter = datetime(2026, 1, 15, 12, tzinfo=UTC)
+    assert _plan(now=winter).feeding_interval == 28 * DAY  # 14 d x2, nothing fed
+    assert _plan([_fed(10)]).feeding_interval == 14 * DAY
