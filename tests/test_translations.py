@@ -16,6 +16,7 @@ from pytest_homeassistant_custom_component.common import MockConfigEntry
 from custom_components.plant_care.const import (
     CONF_FEEDING_INTERVAL,
     CONF_LOCATION_TYPE,
+    CONF_SPECIES_PID,
     CONF_SPECIES_SEARCH,
     CONF_WATERING_INTERVAL,
     DOMAIN,
@@ -132,6 +133,10 @@ async def test_plant_steps_label_every_field(
     result = await hub.start_subentry_reconfigure_flow(hass, subentry_id)
     _assert_fields_labelled(result, steps["reconfigure"])
     result = await hass.config_entries.subentries.async_configure(
-        result["flow_id"], search
+        result["flow_id"],
+        {**search, CONF_WATERING_INTERVAL: 7, CONF_FEEDING_INTERVAL: 30},
     )
-    _assert_fields_labelled(result, steps["reconfigure_details"])
+    assert result["step_id"] == "reconfigure"
+    assert result["data_schema"] is not None
+    assert CONF_SPECIES_PID in result["data_schema"].schema
+    _assert_fields_labelled(result, steps["reconfigure"])

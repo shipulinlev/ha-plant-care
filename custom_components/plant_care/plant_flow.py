@@ -1,8 +1,13 @@
 """Plant subentry flow: adding and editing a plant."""
 
+from collections.abc import Mapping
 from typing import Any
 
-from homeassistant.config_entries import ConfigSubentryFlow, SubentryFlowResult
+from homeassistant.config_entries import (
+    ConfigEntryState,
+    ConfigSubentryFlow,
+    SubentryFlowResult,
+)
 from homeassistant.const import CONF_NAME
 from homeassistant.helpers.selector import (
     AreaSelector,
@@ -32,7 +37,8 @@ from .const import (
     DEFAULT_WATERING_INTERVAL_DAYS,
     RANGE_OVERRIDES,
 )
-from .core.models import LocationType
+from .coordinator import PlantCareCoordinator
+from .core.models import LocationType, SpeciesProfile
 from .flow_helpers import client_from_config, form_error_key
 from .openplantbook import OpenPlantbookError, SpeciesMatch
 
@@ -105,16 +111,17 @@ EDIT_PLANT_DETAILS_SCHEMA = _DETAILS_SCHEMA.extend(
     }
 )
 
-# Keys the details steps do not show: they are carried over or set elsewhere.
-_NOT_IN_DETAILS = (CONF_NAME, CONF_SPECIES_PID, CONF_AREA_ID)
+_RANGE_KEYS = tuple(key for pair in RANGE_OVERRIDES for key in pair)
 
 
 class PlantSubentryFlow(ConfigSubentryFlow):
-    """Add or edit a plant: name and species search first, then the details."""
+    """Add a plant (name and species search, then details) or edit it in one form."""
 
     def __init__(self) -> None:
         self._name = ""
         self._matches: list[SpeciesMatch] = []
+        # The edited plant's species profile, as shown in the edit form.
+        self._profile: SpeciesProfile | None = None
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -136,59 +143,62 @@ class PlantSubentryFlow(ConfigSubentryFlow):
                 title=self._name, data={CONF_NAME: self._name, **user_input}
             )
         return self.async_show_form(
-            step_id="details", data_schema=self._with_species(NEW_PLANT_DETAILS_SCHEMA)
+            step_id="details",
+            data_schema=_with_species(
+                NEW_PLANT_DETAILS_SCHEMA, [_match_option(m) for m in self._matches]
+            ),
         )
 
     async def async_step_reconfigure(
         self, user_input: dict[str, Any] | None = None
     ) -> SubentryFlowResult:
-        """Rename the plant; a new search replaces its species."""
-        errors: dict[str, str] = {}
-        if user_input is not None:
-            errors = await self._async_accept_name(user_input)
-            if not errors:
-                return await self.async_step_reconfigure_details()
-        current = {CONF_NAME: self._get_reconfigure_subentry().data[CONF_NAME]}
-        return self._show_name_form("reconfigure", user_input or current, errors)
-
-    async def async_step_reconfigure_details(
-        self, user_input: dict[str, Any] | None = None
-    ) -> SubentryFlowResult:
-        """Edit details and species range overrides."""
+        """Edit the whole plant in one form; a search adds species to pick from."""
         entry = self._get_entry()
         subentry = self._get_reconfigure_subentry()
-        errors: dict[str, str] = {}
-        if user_input is not None:
+        if user_input is None:
+            if entry.state is ConfigEntryState.LOADED:
+                coordinator: PlantCareCoordinator = entry.runtime_data.coordinator
+                self._profile = coordinator.species_profile(subentry.subentry_id)
+            return self._show_edit_form(_prefill(subentry.data, self._profile), {})
+
+        errors: dict[str, str]
+        search = user_input.get(CONF_SPECIES_SEARCH, "").strip()
+        if search:
+            errors = await self._async_search(search)
+            if not errors:
+                user_input = {
+                    key: value
+                    for key, value in user_input.items()
+                    if key != CONF_SPECIES_SEARCH
+                }
+        else:
             errors = _range_errors(user_input)
             if not errors:
-                data = {CONF_NAME: self._name, **user_input}
-                # Without a new search the species is kept; after one, the
-                # dropdown decides (left empty removes the species).
-                if not self._matches and CONF_SPECIES_PID in subentry.data:
-                    data[CONF_SPECIES_PID] = subentry.data[CONF_SPECIES_PID]
+                # Unchanged prefilled ranges keep following the species.
+                data = {
+                    key: value
+                    for key, value in user_input.items()
+                    if not _is_species_default(key, value, self._profile)
+                }
                 if CONF_AREA_ID in subentry.data:
                     data[CONF_AREA_ID] = subentry.data[CONF_AREA_ID]
                 # The hub's update listener reloads the entry.
                 return self.async_update_and_abort(
-                    entry, subentry, title=self._name, data=data
+                    entry, subentry, title=data[CONF_NAME], data=data
                 )
-
-        current = user_input or {
-            key: value
-            for key, value in subentry.data.items()
-            if key not in _NOT_IN_DETAILS
-        }
-        return self.async_show_form(
-            step_id="reconfigure_details",
-            data_schema=self.add_suggested_values_to_schema(
-                self._with_species(EDIT_PLANT_DETAILS_SCHEMA), current
-            ),
-            errors=errors,
-        )
+        return self._show_edit_form(user_input, errors)
 
     async def _async_accept_name(self, user_input: dict[str, Any]) -> dict[str, str]:
         """Run the optional species search; keep name and matches when it works."""
-        search = user_input.get(CONF_SPECIES_SEARCH, "").strip()
+        errors = await self._async_search(
+            user_input.get(CONF_SPECIES_SEARCH, "").strip()
+        )
+        if not errors:
+            self._name = user_input[CONF_NAME]
+        return errors
+
+    async def _async_search(self, search: str) -> dict[str, str]:
+        """Search OpenPlantbook (nothing for empty text); keep the matches."""
         matches: list[SpeciesMatch] = []
         if search:
             try:
@@ -199,9 +209,36 @@ class PlantSubentryFlow(ConfigSubentryFlow):
                 return {"base": form_error_key(err)}
             if not matches:
                 return {CONF_SPECIES_SEARCH: "no_species_found"}
-        self._name = user_input[CONF_NAME]
         self._matches = matches
         return {}
+
+    def _show_edit_form(
+        self, values: dict[str, Any], errors: dict[str, str]
+    ) -> SubentryFlowResult:
+        """The edit form: the current species and the search matches to pick from."""
+        options = [_match_option(match) for match in self._matches]
+        current = self._get_reconfigure_subentry().data.get(CONF_SPECIES_PID)
+        if current and current not in {match.pid for match in self._matches}:
+            label = (self._profile.display_pid if self._profile else None) or current
+            options.insert(0, SelectOptionDict(value=current, label=label))
+        species = (
+            {vol.Optional(CONF_SPECIES_PID): _species_selector(options)}
+            if options
+            else {}
+        )
+        schema = vol.Schema(
+            {
+                vol.Required(CONF_NAME): TextSelector(),
+                **species,
+                vol.Optional(CONF_SPECIES_SEARCH): TextSelector(),
+                **EDIT_PLANT_DETAILS_SCHEMA.schema,
+            }
+        )
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=self.add_suggested_values_to_schema(schema, values),
+            errors=errors,
+        )
 
     def _show_name_form(
         self,
@@ -215,13 +252,20 @@ class PlantSubentryFlow(ConfigSubentryFlow):
             errors=errors,
         )
 
-    def _with_species(self, schema: vol.Schema) -> vol.Schema:
-        """Add the species dropdown when there are search results."""
-        if not self._matches:
-            return schema
-        return schema.extend(
-            {vol.Optional(CONF_SPECIES_PID): _species_selector(self._matches)}
-        )
+
+def _prefill(data: Mapping[str, Any], profile: SpeciesProfile | None) -> dict[str, Any]:
+    """The plant's settings, with species values for ranges it does not override."""
+    values = {key: value for key, value in data.items() if key != CONF_AREA_ID}
+    if profile is not None:
+        for key in _RANGE_KEYS:
+            default = getattr(profile, key)
+            if values.get(key) is None and default is not None:
+                values[key] = default
+    return values
+
+
+def _is_species_default(key: str, value: Any, profile: SpeciesProfile | None) -> bool:
+    return key in _RANGE_KEYS and profile is not None and value == getattr(profile, key)
 
 
 def _range_errors(user_input: dict[str, Any]) -> dict[str, str]:
@@ -232,21 +276,20 @@ def _range_errors(user_input: dict[str, Any]) -> dict[str, str]:
     return {}
 
 
-def _species_selector(matches: list[SpeciesMatch]) -> SelectSelector:
-    """Dropdown of search results; left empty means no species."""
+def _with_species(schema: vol.Schema, options: list[SelectOptionDict]) -> vol.Schema:
+    """Add the species dropdown when there is a species to pick."""
+    if not options:
+        return schema
+    return schema.extend({vol.Optional(CONF_SPECIES_PID): _species_selector(options)})
+
+
+def _match_option(match: SpeciesMatch) -> SelectOptionDict:
+    label = f"{match.display_pid} ({match.alias})" if match.alias else match.display_pid
+    return SelectOptionDict(value=match.pid, label=label)
+
+
+def _species_selector(options: list[SelectOptionDict]) -> SelectSelector:
+    """Species dropdown; left empty means no species."""
     return SelectSelector(
-        SelectSelectorConfig(
-            options=[
-                SelectOptionDict(
-                    value=match.pid,
-                    label=(
-                        f"{match.display_pid} ({match.alias})"
-                        if match.alias
-                        else match.display_pid
-                    ),
-                )
-                for match in matches
-            ],
-            mode=SelectSelectorMode.DROPDOWN,
-        )
+        SelectSelectorConfig(options=options, mode=SelectSelectorMode.DROPDOWN)
     )

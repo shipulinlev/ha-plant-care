@@ -119,6 +119,9 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - Four examples: notify per plant (`mode: parallel`), morning summary via a binary sensor group helper, actionable notification and NFC tag that press the plant's `water` button (entity-based, since the actions take `device_id`). `tests/test_readme.py` loads every example as an automation.
 - [x] Friendlier README: My Home Assistant buttons (open in HACS, add integration), badges, emojis
   - `tests/test_readme.py` finds the examples section by "Automation examples" without the `## ` prefix, so the heading can carry an emoji.
+- [x] One-form "Edit plant", prefilled with the current species and the OpenPlantbook ranges
+  - `reconfigure_details` merged into `reconfigure`: name, species dropdown (current species first, then search matches, deduplicated), "search another species", details and ranges. A search text shows the form again with the matches; without one, the submit saves.
+  - Ranges are prefilled from the coordinator's cached profile (only while the hub is loaded); values equal to the shown species value are not stored, so unchanged ranges keep following OpenPlantbook. The add flow is unchanged.
 - [ ] Calibrate factors against real data
 - [ ] Choose a license
 - [ ] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
@@ -166,3 +169,4 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-10-01 | Area passed as a one-time `area_id` in subentry data, removed once applied to the device | HA generates the `subentry_id` after the flow finishes, so the flow cannot write the device area itself; the device registry stays the only lasting home of the area |
 | 2026-10-01 | Flow schemas use `voluptuous`, not `probatio` | Current developer docs show `probatio`, but HA 2026.9.4 (our pin) types `FlowHandler` with `vol.Schema` and no core flow uses `probatio` yet; revisit when the pin is bumped |
 | 2026-10-17 | Species display name kept in the profile cache, not in subentry data | One source for everything OpenPlantbook says about a species; existing plants get the name without a migration of their subentries, and `refresh_species` updates it |
+| 2026-10-19 | Plant edit is one form; prefilled species ranges equal to the species value are not stored as overrides | Maintainer's request for a simpler, prefilled edit; prefilling must not silently pin OpenPlantbook values |

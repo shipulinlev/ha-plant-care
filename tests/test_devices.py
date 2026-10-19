@@ -161,10 +161,7 @@ async def test_renamed_plant_renames_device(hass: HomeAssistant) -> None:
 
     result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
     result = await hass.config_entries.subentries.async_configure(
-        result["flow_id"], {CONF_NAME: "Weeping fig"}
-    )
-    result = await hass.config_entries.subentries.async_configure(
-        result["flow_id"], DETAILS
+        result["flow_id"], {CONF_NAME: "Weeping fig", **DETAILS}
     )
     await hass.async_block_till_done()
 

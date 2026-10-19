@@ -83,20 +83,11 @@
         },
         "reconfigure": {
           "title": "Edit plant",
-          "description": "Rename the plant. To change its species, search OpenPlantbook again; leave the search empty to keep the current species.",
+          "description": "Change anything and submit. To move the plant to another room, change the area of its device. Range fields show the OpenPlantbook values; change one to override it, or clear it to use the species default.",
           "data": {
             "name": "Name",
-            "species_search": "Search species"
-          },
-          "data_description": {
-            "species_search": "Latin or common name, e.g. monstera."
-          }
-        },
-        "reconfigure_details": {
-          "title": "Plant details",
-          "description": "To move the plant to another room, change the area of its device. Range fields override the OpenPlantbook values; leave them empty to use the species defaults.",
-          "data": {
             "species_pid": "Species",
+            "species_search": "Search species",
             "location_type": "Location",
             "soil_moisture_entity": "Soil moisture sensor",
             "weather_entity": "Weather entity",
@@ -110,7 +101,8 @@
             "max_soil_moist": "Max soil moisture"
           },
           "data_description": {
-            "species_pid": "Matches from OpenPlantbook. Leave empty to remove the species from this plant.",
+            "species_pid": "Leave empty to remove the species from this plant.",
+            "species_search": "To choose another species, type part of its name and submit: the matches are added to the species list.",
             "location_type": "Indoor plants use room sensors; outdoor plants use weather and rain.",
             "soil_moisture_entity": "Optional. When set, it takes priority over the estimate.",
             "weather_entity": "Outdoor plants only. Leave empty to use the hub default.",
