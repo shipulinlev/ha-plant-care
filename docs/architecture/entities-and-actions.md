@@ -1,6 +1,6 @@
 # Plant entities and actions
 
-Modules: `entity.py` (`PlantCareEntity`: `device_info`, `unique_id`), `sensor.py`, `binary_sensor.py`, `button.py`, `services.py`, `services.yaml`, `diagnostics.py`.
+Modules: `entity.py` (`PlantCareEntity`: `device_info`, `unique_id`), `sensor.py`, `binary_sensor.py`, `button.py`, `image.py`, `services.py`, `services.yaml`, `diagnostics.py`.
 
 ## Device
 The plant's device carries the species name as `model` (see `data-model.md`, "Device and room"); the Lovelace cards read it from `hass.devices[device_id].model`.
@@ -13,11 +13,13 @@ The plant's device carries the species name as `model` (see `data-model.md`, "De
 | `sensor` | `last_watered`, `last_fed` | `device_class: timestamp` |
 | `binary_sensor` | `needs_water`, `needs_feeding` | for automations and notifications |
 | `button` | `water`, `feed` | log care "now" |
+| `image` | `photo` | the plant's photo |
 
 All entities derive from `PlantCareEntity`: `has_entity_name = True`, `translation_key` = key, `unique_id = f"{subentry_id}_{key}"`, attached to the plant's device, unavailable while the coordinator has no plan for the plant. Platforms add each plant's entities with `async_add_entities(..., config_subentry_id=subentry_id)`, so HA removes them with the plant.
 
 - `next_watering`, `next_feeding` attribute: `interval_days` (float, 2 decimals): the plan's `watering_interval` / `feeding_interval` in days, left out when unknown (the entity is unavailable without a plan). Recorded: it changes only with the interval (history, climate multiplier, season).
 - `next_watering` `entity_picture`: the species photo (`image_url` of the cached OpenPlantbook profile, read through `coordinator.species_profile`), absent without a species or a photo. Only this sensor has it, so the cards know where to look; it also replaces the sensor's icon in default entity rows.
+- `photo` (`PlantPhoto`, `ImageEntity`): with an uploaded photo (`photo` in the subentry data, see `data-model.md`) HA serves the file through its image proxy, and `entity_picture` is the proxy URL with a rotating access token; the state (`image_last_updated`) is the file's modification time. Without an upload, `entity_picture` is the species photo URL, as on `next_watering`, and the entity serves no image itself. It stays available without a plan: a photo does not depend on one. A photo change edits the subentry, which reloads the hub, so the entity never watches for a new file.
 - `watering_status` attributes: `climate_status` (`ok` | `out_of_range` | `unknown`) and `explanation` (excluded from the recorder via `_unrecorded_attributes`).
 - `needs_water`, `needs_feeding`: on while the watering/feeding status is `due` or `overdue`, off for `ok` and `soon`, unknown while nothing is scheduled (no care logged yet).
 - Icons live in `icons.json` (per translation key, with state icons for the statuses).

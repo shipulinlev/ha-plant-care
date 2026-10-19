@@ -5,10 +5,12 @@ from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
-from .const import DOMAIN
+from .const import CONF_PHOTO, DOMAIN
 from .coordinator import PlantCareCoordinator
 from .devices import async_sync_plant_devices, async_update_species_models
 from .flow_helpers import client_from_config
+from .photos import async_prune_photos
+from .plants import plant_subentries
 from .runtime import PlantCareConfigEntry, PlantCareRuntimeData
 from .services import async_setup_services
 from .storage import CareLog, ProfileCache
@@ -16,7 +18,12 @@ from .storage import CareLog, ProfileCache
 # Configured through the UI only; YAML config for the domain is rejected.
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
-PLATFORMS: list[Platform] = [Platform.BINARY_SENSOR, Platform.BUTTON, Platform.SENSOR]
+PLATFORMS: list[Platform] = [
+    Platform.BINARY_SENSOR,
+    Platform.BUTTON,
+    Platform.IMAGE,
+    Platform.SENSOR,
+]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
@@ -31,6 +38,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: PlantCareConfigEntry) ->
     await care_log.async_load()
     for plant_id in care_log.plant_ids() - set(entry.subentries):
         await care_log.async_remove_plant(plant_id)
+    # Photos of deleted plants and photos replaced by a new upload.
+    await async_prune_photos(
+        hass,
+        {
+            photo
+            for subentry in plant_subentries(entry)
+            if (photo := subentry.data.get(CONF_PHOTO))
+        },
+    )
     profile_cache = ProfileCache(hass)
     await profile_cache.async_load()
 

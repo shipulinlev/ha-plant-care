@@ -69,7 +69,8 @@
             "soil_moisture_entity": "Soil moisture sensor",
             "weather_entity": "Weather entity",
             "initial_watering_interval_days": "Watering interval",
-            "feeding_interval_days": "Feeding interval"
+            "feeding_interval_days": "Feeding interval",
+            "photo_upload": "Photo"
           },
           "data_description": {
             "species_pid": "Matches from OpenPlantbook. Leave empty to add the plant without a species.",
@@ -78,7 +79,8 @@
             "soil_moisture_entity": "Optional. When set, it takes priority over the estimate.",
             "weather_entity": "Outdoor plants only. Leave empty to use the hub default.",
             "initial_watering_interval_days": "Starting interval in days; it adapts to the watering you log.",
-            "feeding_interval_days": "Days between feedings in spring and summer; longer in autumn and winter."
+            "feeding_interval_days": "Days between feedings in spring and summer; longer in autumn and winter.",
+            "photo_upload": "Optional. A JPEG, PNG or WebP of your plant, up to 10 MB. Without one, the species photo from OpenPlantbook is shown."
           }
         },
         "reconfigure": {
@@ -98,7 +100,9 @@
             "min_env_humid": "Min air humidity",
             "max_env_humid": "Max air humidity",
             "min_soil_moist": "Min soil moisture",
-            "max_soil_moist": "Max soil moisture"
+            "max_soil_moist": "Max soil moisture",
+            "photo_upload": "Photo",
+            "remove_photo": "Remove photo"
           },
           "data_description": {
             "species_pid": "Leave empty to remove the species from this plant.",
@@ -107,7 +111,9 @@
             "soil_moisture_entity": "Optional. When set, it takes priority over the estimate.",
             "weather_entity": "Outdoor plants only. Leave empty to use the hub default.",
             "initial_watering_interval_days": "Starting interval in days; it adapts to the watering you log.",
-            "feeding_interval_days": "Days between feedings in spring and summer; longer in autumn and winter."
+            "feeding_interval_days": "Days between feedings in spring and summer; longer in autumn and winter.",
+            "photo_upload": "Upload a new photo to replace the current one. Without a photo of your own, the species photo from OpenPlantbook is shown.",
+            "remove_photo": "Go back to the species photo from OpenPlantbook."
           }
         }
       },
@@ -116,7 +122,8 @@
         "rate_limited": "OpenPlantbook rate limit reached. Try again later.",
         "cannot_connect": "Could not connect to OpenPlantbook.",
         "no_species_found": "No species matches this search. Try another name or clear the field.",
-        "invalid_range": "A minimum is above its maximum."
+        "invalid_range": "A minimum is above its maximum.",
+        "invalid_photo": "The photo must be a JPEG, PNG or WebP image of at most 10 MB."
       },
       "abort": {
         "reconfigure_successful": "Plant updated."
@@ -199,6 +206,11 @@
           "due": "Due",
           "overdue": "Overdue"
         }
+      }
+    },
+    "image": {
+      "photo": {
+        "name": "Photo"
       }
     }
   },

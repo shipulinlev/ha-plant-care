@@ -136,6 +136,10 @@ Additive only: existing entities, unique IDs and automations stay as they are; t
 - [x] `entity_picture` on `next_watering` from the OpenPlantbook profile's `image_url`
   - The detail endpoint returns `image_url` (OpenPlantbook API 1.02, checked in the `slaxor505/openplantbook-client` docs). Stored as `SpeciesProfile.image_url` in the same cache v2 as the name. The sensor reads the cached profile without range overrides; diagnostics include the URL (public, not sensitive). The client keeps only absolute http(s) URLs (security review: no `javascript:`/`data:` pictures).
 
+- [x] Uploaded plant photo as an `image` entity
+  - Add and edit forms take a photo upload (`FileSelector`); `photos.py` checks it (10 MB, JPEG/PNG/WebP by magic bytes) and stores it in `<config>/plant_care/photos/` under a random name kept in subentry data as `photo`; the edit form carries it over or removes it. `image.<plant>_photo` serves the file through HA's image proxy, else shows the species photo URL. Setup prunes files no plant uses. Manifest depends on `file_upload`. The plant form schemas moved to `plant_schemas.py` (the flow passed 300 lines).
+  - Not checked live yet: a `FileSelector` upload in a config subentry flow (covered in tests with a patched `process_uploaded_file`).
+
 ## Backlog / ideas (after v0.1)
 - Persist `RainTracker` days in a `Store`, so past rain survives an HA restart (today it is lost and an outdoor plant may show "needs water" right after rain)
 - "Garden" Lovelace card via websocket API
@@ -169,4 +173,5 @@ Short index of decisions. When a decision needs a full ADR in `docs/adr/`, link 
 | 2026-10-01 | Area passed as a one-time `area_id` in subentry data, removed once applied to the device | HA generates the `subentry_id` after the flow finishes, so the flow cannot write the device area itself; the device registry stays the only lasting home of the area |
 | 2026-10-01 | Flow schemas use `voluptuous`, not `probatio` | Current developer docs show `probatio`, but HA 2026.9.4 (our pin) types `FlowHandler` with `vol.Schema` and no core flow uses `probatio` yet; revisit when the pin is bumped |
 | 2026-10-17 | Species display name kept in the profile cache, not in subentry data | One source for everything OpenPlantbook says about a species; existing plants get the name without a migration of their subentries, and `refresh_species` updates it |
+| 2026-10-19 | Own plant photos are uploaded in the plant forms, stored by the integration and served by an `image` entity; no resizing (no Pillow) | The photo belongs to the plant device, so every card and dashboard sees the same one; the image proxy handles access control; a card cannot store files |
 | 2026-10-19 | Plant edit is one form; prefilled species ranges equal to the species value are not stored as overrides | Maintainer's request for a simpler, prefilled edit; prefilling must not silently pin OpenPlantbook values |

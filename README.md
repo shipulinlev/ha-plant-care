@@ -58,7 +58,7 @@ Copy `custom_components/plant_care` to `<config>/custom_components/` and restart
    [![Open your Home Assistant instance and start setting up Plant Care.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=plant_care)
 
    Or go to *Settings → Devices & services → Add integration → Plant Care*. Enter the credentials and optionally pick a weather entity for outdoor plants.
-3. 🌿 On the integration card click **Add plant**: name, species (OpenPlantbook search), indoor or outdoor, area, optional soil moisture sensor, initial watering interval and feeding interval.
+3. 🌿 On the integration card click **Add plant**: name, species (OpenPlantbook search), indoor or outdoor, area, optional soil moisture sensor, initial watering interval and feeding interval, and an optional photo of your plant (JPEG, PNG or WebP, up to 10 MB). You can add, replace or remove the photo later under **Edit plant**.
 
 That's it: your plant shows up as a device with its own sensors and buttons. 🎉
 
@@ -72,6 +72,7 @@ That's it: your plant shows up as a device with its own sensors and buttons. �
 | 🕒 `sensor.<plant>_last_watered` / `_last_fed` | last care event |
 | 🔔 `binary_sensor.<plant>_needs_water` / `_needs_feeding` | `on` while watering or feeding is due or overdue |
 | 👆 `button.<plant>_water` / `_feed` | log "watered" or "fed" now |
+| 🖼️ `image.<plant>_photo` | your uploaded photo; without one, its picture is the species photo |
 
 ## 🛠️ Actions
 

@@ -19,9 +19,13 @@ CONF_FEEDING_INTERVAL: Final = "feeding_interval_days"
 # One-time handoff from the flow to device creation, then removed from the
 # data: the area lives only in the device registry.
 CONF_AREA_ID: Final = "area_id"
+# File name of the uploaded photo in the photo folder (photos.py).
+CONF_PHOTO: Final = "photo"
 
 # Plant flow only (not stored).
 CONF_SPECIES_SEARCH: Final = "species_search"
+CONF_PHOTO_UPLOAD: Final = "photo_upload"
+CONF_REMOVE_PHOTO: Final = "remove_photo"
 
 DEFAULT_WATERING_INTERVAL_DAYS: Final = 7
 DEFAULT_FEEDING_INTERVAL_DAYS: Final = 30

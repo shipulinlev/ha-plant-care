@@ -1,6 +1,8 @@
 """Tests for the plant subentry flow (adding and editing a plant)."""
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from pathlib import Path
+import re
 from typing import Any
 from unittest.mock import AsyncMock, patch
 
@@ -15,6 +17,9 @@ from custom_components.plant_care.const import (
     CONF_AREA_ID,
     CONF_FEEDING_INTERVAL,
     CONF_LOCATION_TYPE,
+    CONF_PHOTO,
+    CONF_PHOTO_UPLOAD,
+    CONF_REMOVE_PHOTO,
     CONF_SOIL_MOISTURE_ENTITY,
     CONF_SPECIES_PID,
     CONF_SPECIES_SEARCH,
@@ -29,6 +34,8 @@ from custom_components.plant_care.openplantbook import (
     OpenPlantbookRateLimitError,
     SpeciesMatch,
 )
+
+from .conftest import JPEG
 
 MONSTERA = SpeciesMatch(
     pid="monstera deliciosa",
@@ -521,3 +528,151 @@ async def test_reconfigure_keeps_pending_area_handoff(
     result = await _configure(hass, result, {CONF_NAME: "Monstera", **NEW_DETAILS})
 
     assert entry.subentries[subentry_id].data[CONF_AREA_ID] == "kitchen"
+
+
+DETAILS = {
+    CONF_LOCATION_TYPE: "indoor",
+    CONF_WATERING_INTERVAL: 7,
+    CONF_FEEDING_INTERVAL: 30,
+}
+STORED_PHOTO = re.compile(r"[0-9a-f]{32}\.jpg")
+OLD_PHOTO = "0" * 32 + ".jpg"
+
+
+async def test_add_plant_with_photo(
+    hass: HomeAssistant,
+    hub_entry: MockConfigEntry,
+    mock_search: AsyncMock,
+    photo_dir: Path,
+    upload: Callable[[bytes], str],
+) -> None:
+    """An uploaded photo is copied to the photo folder and its name stored."""
+    result = await _start(hass, hub_entry)
+    result = await _configure(hass, result, {CONF_NAME: "Ficus"})
+    assert CONF_PHOTO_UPLOAD in _fields(result)
+    assert CONF_REMOVE_PHOTO not in _fields(result)
+
+    result = await _configure(
+        hass, result, {**DETAILS, CONF_PHOTO_UPLOAD: upload(JPEG)}
+    )
+
+    assert result["type"] is FlowResultType.CREATE_ENTRY
+    name = result["data"][CONF_PHOTO]
+    assert STORED_PHOTO.fullmatch(name)
+    assert result["data"] == {CONF_NAME: "Ficus", **DETAILS, CONF_PHOTO: name}
+    assert await hass.async_add_executor_job((photo_dir / name).read_bytes) == JPEG
+
+
+@pytest.mark.parametrize(
+    "content",
+    [b"GIF89a not supported", b"\xff\xd8\xff" + bytes(11 * 1024 * 1024)],
+    ids=["gif", "too_large"],
+)
+async def test_add_plant_rejects_a_bad_photo(
+    hass: HomeAssistant,
+    hub_entry: MockConfigEntry,
+    photo_dir: Path,
+    upload: Callable[[bytes], str],
+    content: bytes,
+) -> None:
+    """Anything but a JPEG, PNG or WebP of at most 10 MB stays on the form."""
+    result = await _start(hass, hub_entry)
+    result = await _configure(hass, result, {CONF_NAME: "Ficus"})
+
+    result = await _configure(
+        hass, result, {**DETAILS, CONF_PHOTO_UPLOAD: upload(content)}
+    )
+
+    assert result["step_id"] == "details"
+    assert result["errors"] == {CONF_PHOTO_UPLOAD: "invalid_photo"}
+    assert _suggested(result)[CONF_WATERING_INTERVAL] == 7
+    assert not await hass.async_add_executor_job(photo_dir.exists)
+
+
+async def test_reconfigure_keeps_the_photo(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """Saving without a new upload keeps the photo; removing it is offered."""
+    entry = _hub_with_plant(hass, {**OLD_PLANT, CONF_PHOTO: OLD_PHOTO})
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+    assert {CONF_PHOTO_UPLOAD, CONF_REMOVE_PHOTO} <= _fields(result)
+    assert CONF_PHOTO not in _fields(result)
+
+    result = await _configure(hass, result, {CONF_NAME: "Monstera", **NEW_DETAILS})
+
+    assert entry.subentries[subentry_id].data[CONF_PHOTO] == OLD_PHOTO
+
+
+async def test_reconfigure_removes_the_photo(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """`remove_photo` drops the photo; the flag itself is not stored."""
+    entry = _hub_with_plant(hass, {**OLD_PLANT, CONF_PHOTO: OLD_PHOTO})
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+
+    result = await _configure(
+        hass, result, {CONF_NAME: "Monstera", **NEW_DETAILS, CONF_REMOVE_PHOTO: True}
+    )
+
+    data = entry.subentries[subentry_id].data
+    assert CONF_PHOTO not in data
+    assert CONF_REMOVE_PHOTO not in data
+
+
+async def test_reconfigure_replaces_the_photo(
+    hass: HomeAssistant,
+    mock_search: AsyncMock,
+    photo_dir: Path,
+    upload: Callable[[bytes], str],
+) -> None:
+    """A new upload gets a new name, so no cache shows the old photo."""
+    entry = _hub_with_plant(hass, {**OLD_PLANT, CONF_PHOTO: OLD_PHOTO})
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+
+    result = await _configure(
+        hass,
+        result,
+        {CONF_NAME: "Monstera", **NEW_DETAILS, CONF_PHOTO_UPLOAD: upload(JPEG)},
+    )
+
+    name = entry.subentries[subentry_id].data[CONF_PHOTO]
+    assert name != OLD_PHOTO
+    assert await hass.async_add_executor_job((photo_dir / name).read_bytes) == JPEG
+
+
+async def test_reconfigure_bad_photo_stays_on_the_form(
+    hass: HomeAssistant,
+    mock_search: AsyncMock,
+    photo_dir: Path,
+    upload: Callable[[bytes], str],
+) -> None:
+    """A rejected upload keeps the old photo and the entered values."""
+    entry = _hub_with_plant(hass, {**OLD_PLANT, CONF_PHOTO: OLD_PHOTO})
+    (subentry_id,) = entry.subentries
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+
+    result = await _configure(
+        hass,
+        result,
+        {CONF_NAME: "Big", **NEW_DETAILS, CONF_PHOTO_UPLOAD: upload(b"text")},
+    )
+
+    assert result["errors"] == {CONF_PHOTO_UPLOAD: "invalid_photo"}
+    assert _suggested(result)[CONF_NAME] == "Big"
+    assert entry.subentries[subentry_id].data[CONF_PHOTO] == OLD_PHOTO
+
+
+async def test_reconfigure_without_photo_offers_no_removal(
+    hass: HomeAssistant, mock_search: AsyncMock
+) -> None:
+    """There is nothing to remove from a plant without a photo."""
+    entry = _hub_with_plant(hass, OLD_PLANT)
+    (subentry_id,) = entry.subentries
+
+    result = await entry.start_subentry_reconfigure_flow(hass, subentry_id)
+
+    assert CONF_PHOTO_UPLOAD in _fields(result)
+    assert CONF_REMOVE_PHOTO not in _fields(result)

@@ -50,6 +50,11 @@
       "last_fed": {
         "default": "mdi:leaf"
       }
+    },
+    "image": {
+      "photo": {
+        "default": "mdi:image-filter-hdr"
+      }
     }
   },
   "services": {

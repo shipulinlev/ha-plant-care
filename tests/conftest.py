@@ -1,5 +1,11 @@
 """Shared fixtures for Plant Care tests."""
 
+from collections.abc import Callable, Iterator
+from contextlib import contextmanager
+from pathlib import Path
+from unittest.mock import patch
+import uuid
+
 from homeassistant.config_entries import ConfigSubentryData
 from homeassistant.const import CONF_CLIENT_ID, CONF_CLIENT_SECRET, CONF_NAME
 from homeassistant.core import HomeAssistant
@@ -20,6 +26,9 @@ from custom_components.plant_care.const import (
 from custom_components.plant_care.openplantbook import BASE_URL
 
 FICUS_IMAGE = "https://opb-img.plantbook.io/ficus.jpg"
+
+# The leading bytes of a JPEG are all the integration checks.
+JPEG = b"\xff\xd8\xff\xe0" + bytes(16)
 
 
 @pytest.fixture(autouse=True)
@@ -90,3 +99,35 @@ async def species_entry(
     assert await hass.config_entries.async_setup(entry.entry_id)
     await hass.async_block_till_done()
     return entry
+
+
+@pytest.fixture
+def photo_dir(hass: HomeAssistant, tmp_path: Path) -> Path:
+    """Use a temporary config folder; returns its plant photo folder."""
+    hass.config.config_dir = str(tmp_path)
+    return tmp_path / DOMAIN / "photos"
+
+
+@pytest.fixture
+def upload(tmp_path: Path) -> Iterator[Callable[[bytes], str]]:
+    """Stand in for HA's file upload: `upload(content)` returns a file id."""
+    uploads = tmp_path / "uploads"
+    uploads.mkdir()
+
+    @contextmanager
+    def process(hass: HomeAssistant, file_id: str) -> Iterator[Path]:
+        path = uploads / file_id
+        if not path.exists():
+            raise ValueError("File does not exist")
+        try:
+            yield path
+        finally:
+            path.unlink()
+
+    def add(content: bytes) -> str:
+        file_id = uuid.uuid4().hex
+        (uploads / file_id).write_bytes(content)
+        return file_id
+
+    with patch("custom_components.plant_care.photos.process_uploaded_file", process):
+        yield add
