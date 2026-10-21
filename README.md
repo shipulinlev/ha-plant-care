@@ -1,4 +1,6 @@
-# 🪴 Plant Care for Home Assistant
+<p align="center"><img src="https://raw.githubusercontent.com/shipulinlev/ha-plant-care/main/custom_components/plant_care/brand/icon.png" alt="Plant Care icon" width="128"></p>
+
+# Plant Care for Home Assistant
 
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories)
 [![Home Assistant 2026.8+](https://img.shields.io/badge/Home%20Assistant-2026.8%2B-18BCF2?logo=homeassistant&logoColor=white)](https://www.home-assistant.io)

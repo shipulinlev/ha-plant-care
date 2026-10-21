@@ -126,7 +126,7 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 - [x] Choose a license
   - MIT (`aaadee8`), added for HACS validation.
 - [x] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
-  - "Leaf clock" icon (two leaves as clock hands: scheduled care), source `docs/brand/icon.svg`, exported to `brand/icon.png` and `icon@2x.png`. No logo: HA falls back to the icon. Whether the HACS brands check accepts a local `brand/` folder is confirmed only by the next CI run.
+  - "Leaf clock" icon (two leaves as clock hands: scheduled care), source `docs/brand/icon.svg`, exported to `brand/icon.png` and `icon@2x.png`. No logo: HA falls back to the icon. Repository: icon in the README header, `docs/brand/social-preview.png` for the GitHub social preview (set by hand in the repo settings). Whether the HACS brands check accepts a local `brand/` folder is confirmed only by the next CI run.
 - [x] First release v0.1.0 (HACS custom repository)
   - Released 2026-10-21 from `4edfd0c` (manifest `version` 0.1.0), CI green. The manual HA run, factor calibration and brand assets are still open; the release notes list the last two as known limitations. Next release: bump `manifest.json` `version`, push, wait for CI, then `gh release create vX.Y.Z`.
 
