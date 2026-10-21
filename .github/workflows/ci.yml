@@ -52,5 +52,3 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
-          # Brand assets are not published yet (see PLAN.md, phase 6).
-          ignore: brands
