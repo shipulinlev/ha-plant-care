@@ -126,7 +126,8 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
 - [x] Choose a license
   - MIT (`aaadee8`), added for HACS validation.
 - [ ] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
-- [~] First release v0.1.0 (HACS custom repository)
+- [x] First release v0.1.0 (HACS custom repository)
+  - Released 2026-10-21 from `4edfd0c` (manifest `version` 0.1.0), CI green. The manual HA run, factor calibration and brand assets are still open; the release notes list the last two as known limitations. Next release: bump `manifest.json` `version`, push, wait for CI, then `gh release create vX.Y.Z`.
 
 ## Phase 7. Data for the Lovelace cards (`shipulinlev/ha-plants-care-card`)
 Additive only: existing entities, unique IDs and automations stay as they are; the cards hide missing fields.
