@@ -123,9 +123,10 @@ Update rules are in `CLAUDE.md` ("Workflow"). Items tracked as GitHub issues car
   - `reconfigure_details` merged into `reconfigure`: name, species dropdown (current species first, then search matches, deduplicated), "search another species", details and ranges. A search text shows the form again with the matches; without one, the submit saves.
   - Ranges are prefilled from the coordinator's cached profile (only while the hub is loaded); values equal to the shown species value are not stored, so unchanged ranges keep following OpenPlantbook. The add flow is unchanged.
 - [ ] Calibrate factors against real data
-- [ ] Choose a license
+- [x] Choose a license
+  - MIT (`aaadee8`), added for HACS validation.
 - [ ] Brand assets (icon/logo) and drop `ignore: brands` from the HACS job in CI
-- [ ] First release v0.1.0 (HACS custom repository)
+- [~] First release v0.1.0 (HACS custom repository)
 
 ## Phase 7. Data for the Lovelace cards (`shipulinlev/ha-plants-care-card`)
 Additive only: existing entities, unique IDs and automations stay as they are; the cards hide missing fields.
