@@ -22,6 +22,7 @@ Applies to all code under `custom_components/plant_care/` except `core/`.
 - Removing a subentry makes HA clear its devices and entities (`async_clear_config_subentry`); adding or updating one fires the entry's update listeners but reloads nothing by itself.
 - Schemas use `voluptuous` (`import voluptuous as vol`). The developer docs already show `probatio`, but HA 2026.9 types its flow API with `vol.Schema` and no core flow uses `probatio`; switch only after bumping the HA pin to a version that accepts it.
 - Single instance: `"single_config_entry": true` in `manifest.json`, no check in the flow.
+- Brand images (HA 2026.3+): `brand/icon.png` (256 px) and `brand/icon@2x.png` (512 px) in the integration folder, served by the `brands` integration ahead of the brands CDN; no PR to `home-assistant/brands`. The editable source is `docs/brand/icon.svg`; re-export both PNGs (transparent background) after changing it.
 
 ## Checking an API
 Current docs first (context7 `/home-assistant/developers.home-assistant`), then the installed source in the dev container (`/home/vscode/.venv/lib/python3.14/site-packages/homeassistant/`). The docs can run ahead of the pinned version; the installed source is what the code runs against.
